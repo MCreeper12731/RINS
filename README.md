@@ -1,0 +1,2 @@
+# RINS
+Razvoj inteligentnih sistemov
