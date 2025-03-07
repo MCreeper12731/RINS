@@ -1,1 +1,0 @@
-/home/xi/Documents/RINS/ROS2/build/dis_homework1/rosidl_typesupport_fastrtps_c/dis_homework1/msg/rosidl_typesupport_fastrtps_c__visibility_control.h

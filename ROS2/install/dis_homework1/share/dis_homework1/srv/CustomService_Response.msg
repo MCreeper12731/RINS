@@ -1,1 +1,0 @@
-/home/xi/Documents/RINS/ROS2/build/dis_homework1/rosidl_cmake/srv/CustomService_Response.msg
