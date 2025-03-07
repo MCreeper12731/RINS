@@ -1,0 +1,1 @@
+/home/xi/Documents/RINS/ROS2/build/dis_homework1/rosidl_generator_c/dis_homework1/msg/rosidl_generator_c__visibility_control.h

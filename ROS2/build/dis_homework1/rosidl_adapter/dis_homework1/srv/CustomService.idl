@@ -1,0 +1,20 @@
+// generated from rosidl_adapter/resource/srv.idl.em
+// with input from dis_homework1/srv/CustomService.srv
+// generated code does not contain a copyright notice
+
+
+module dis_homework1 {
+  module srv {
+    typedef int64 int64__10[10];
+    struct CustomService_Request {
+      string field1;
+
+      int64__10 field2;
+    };
+    struct CustomService_Response {
+      string field3;
+
+      int64 field4;
+    };
+  };
+};
