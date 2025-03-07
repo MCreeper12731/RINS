@@ -1,0 +1,252 @@
+[0.008s] Invoking command in '/home/xi/Documents/RINS/ROS2/build/dis_homework1': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/xi/Documents/RINS/ROS2/install/dis_tutorial2:/opt/ros/humble /usr/bin/cmake /home/xi/Documents/RINS/ROS2/src/dis_homework1 -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/xi/Documents/RINS/ROS2/install/dis_homework1
+[0.056s] -- The C compiler identification is GNU 11.4.0
+[0.106s] -- The CXX compiler identification is GNU 11.4.0
+[0.113s] -- Detecting C compiler ABI info
+[0.173s] -- Detecting C compiler ABI info - done
+[0.180s] -- Check for working C compiler: /usr/bin/cc - skipped
+[0.180s] -- Detecting C compile features
+[0.181s] -- Detecting C compile features - done
+[0.183s] -- Detecting CXX compiler ABI info
+[0.253s] -- Detecting CXX compiler ABI info - done
+[0.261s] -- Check for working CXX compiler: /usr/bin/c++ - skipped
+[0.262s] -- Detecting CXX compile features
+[0.262s] -- Detecting CXX compile features - done
+[0.264s] -- Found ament_cmake: 1.3.11 (/opt/ros/humble/share/ament_cmake/cmake)
+[0.396s] -- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter 
+[0.451s] -- Override CMake install command with custom implementation using symlinks instead of copying resources
+[0.470s] -- Found rclcpp: 16.0.11 (/opt/ros/humble/share/rclcpp/cmake)
+[0.502s] -- Found rosidl_generator_c: 3.1.6 (/opt/ros/humble/share/rosidl_generator_c/cmake)
+[0.506s] -- Found rosidl_adapter: 3.1.6 (/opt/ros/humble/share/rosidl_adapter/cmake)
+[0.513s] -- Found rosidl_generator_cpp: 3.1.6 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)
+[0.523s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[0.537s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[0.573s] -- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)
+[0.575s] -- Found rmw_fastrtps_cpp: 6.2.7 (/opt/ros/humble/share/rmw_fastrtps_cpp/cmake)
+[0.645s] -- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.2")  
+[0.667s] -- Found FastRTPS: /opt/ros/humble/include  
+[0.700s] -- Using RMW implementation 'rmw_fastrtps_cpp' as default
+[0.706s] -- Looking for pthread.h
+[0.770s] -- Looking for pthread.h - found
+[0.770s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+[0.840s] -- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+[0.841s] -- Found Threads: TRUE  
+[0.887s] -- Found rclpy: 3.3.15 (/opt/ros/humble/share/rclpy/cmake)
+[0.888s] -- Found std_srvs: 4.2.4 (/opt/ros/humble/share/std_srvs/cmake)
+[0.898s] -- Found rosidl_default_generators: 1.2.0 (/opt/ros/humble/share/rosidl_default_generators/cmake)
+[1.144s] -- Found ament_cmake_ros: 0.10.0 (/opt/ros/humble/share/ament_cmake_ros/cmake)
+[1.461s] -- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+[1.586s] -- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+[1.606s] -- Found PythonInterp: /usr/bin/python3 (found suitable version "3.10.12", minimum required is "3.6") 
+[1.607s] -- Found python_cmake_module: 0.10.0 (/opt/ros/humble/share/python_cmake_module/cmake)
+[1.629s] -- Found PythonLibs: /usr/lib/x86_64-linux-gnu/libpython3.10.so (found suitable version "3.10.12", minimum required is "3.5") 
+[1.629s] -- Using PYTHON_EXECUTABLE: /usr/bin/python3
+[1.629s] -- Using PYTHON_INCLUDE_DIRS: /usr/include/python3.10
+[1.629s] -- Using PYTHON_LIBRARIES: /usr/lib/x86_64-linux-gnu/libpython3.10.so
+[1.648s] -- Found PythonExtra: .so  
+[1.693s] -- Found ament_lint_auto: 0.12.11 (/opt/ros/humble/share/ament_lint_auto/cmake)
+[1.709s] -- Added test 'flake8' to check Python code syntax and style conventions
+[1.709s] -- Added test 'lint_cmake' to check CMake code style
+[1.710s] -- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257
+[1.711s] -- Added test 'xmllint' to check XML markup files
+[1.714s] -- Configuring done
+[1.747s] -- Generating done
+[1.757s] -- Build files have been written to: /home/xi/Documents/RINS/ROS2/build/dis_homework1
+[1.766s] Invoked command in '/home/xi/Documents/RINS/ROS2/build/dis_homework1' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/xi/Documents/RINS/ROS2/install/dis_tutorial2:/opt/ros/humble /usr/bin/cmake /home/xi/Documents/RINS/ROS2/src/dis_homework1 -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/xi/Documents/RINS/ROS2/install/dis_homework1
+[1.768s] Invoking command in '/home/xi/Documents/RINS/ROS2/build/dis_homework1': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/xi/Documents/RINS/ROS2/install/dis_tutorial2:/opt/ros/humble /usr/bin/cmake --build /home/xi/Documents/RINS/ROS2/build/dis_homework1 -- -j12 -l12
+[1.803s] [  2%] [34m[1mGenerating C code for ROS interfaces[0m
+[1.812s] [  5%] [34m[1mGenerating C++ code for ROS interfaces[0m
+[1.820s] [  5%] Built target ament_cmake_python_symlink_dis_homework1
+[2.033s] running egg_info
+[2.033s] creating dis_homework1.egg-info
+[2.034s] writing dis_homework1.egg-info/PKG-INFO
+[2.034s] writing dependency_links to dis_homework1.egg-info/dependency_links.txt
+[2.034s] writing top-level names to dis_homework1.egg-info/top_level.txt
+[2.034s] writing manifest file 'dis_homework1.egg-info/SOURCES.txt'
+[2.036s] reading manifest file 'dis_homework1.egg-info/SOURCES.txt'
+[2.036s] writing manifest file 'dis_homework1.egg-info/SOURCES.txt'
+[2.059s] [  5%] Built target ament_cmake_python_build_dis_homework1_egg
+[2.108s] [  5%] Built target dis_homework1__cpp
+[2.108s] [  7%] [32mBuilding C object CMakeFiles/dis_homework1__rosidl_generator_c.dir/rosidl_generator_c/dis_homework1/msg/detail/custom_message__functions.c.o[0m
+[2.108s] [ 10%] [32mBuilding C object CMakeFiles/dis_homework1__rosidl_generator_c.dir/rosidl_generator_c/dis_homework1/srv/detail/custom_service__functions.c.o[0m
+[2.117s] [ 15%] [34m[1mGenerating C++ type support for eProsima Fast-RTPS[0m
+[2.118s] [ 15%] [34m[1mGenerating C++ type support dispatch for ROS interfaces[0m
+[2.118s] [ 17%] [34m[1mGenerating C++ introspection for ROS interfaces[0m
+[2.164s] [ 20%] [32m[1mLinking C shared library libdis_homework1__rosidl_generator_c.so[0m
+[2.198s] [ 20%] Built target dis_homework1__rosidl_generator_c
+[2.207s] [ 28%] [34m[1mGenerating C type support for eProsima Fast-RTPS[0m
+[2.207s] [ 28%] [34m[1mGenerating C type support dispatch for ROS interfaces[0m
+[2.207s] [ 28%] [34m[1mGenerating C introspection for ROS interfaces[0m
+[2.360s] [ 30%] [32mBuilding CXX object CMakeFiles/dis_homework1__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/dis_homework1/msg/custom_message__type_support.cpp.o[0m
+[2.363s] [ 33%] [32mBuilding CXX object CMakeFiles/dis_homework1__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/dis_homework1/srv/custom_service__type_support.cpp.o[0m
+[2.387s] [ 35%] [32mBuilding CXX object CMakeFiles/dis_homework1__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/dis_homework1/msg/detail/custom_message__type_support.cpp.o[0m
+[2.390s] [ 38%] [32mBuilding CXX object CMakeFiles/dis_homework1__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/dis_homework1/srv/detail/custom_service__type_support.cpp.o[0m
+[2.412s] [ 41%] [32mBuilding CXX object CMakeFiles/dis_homework1__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/dis_homework1/msg/detail/dds_fastrtps/custom_message__type_support.cpp.o[0m
+[2.416s] [ 43%] [32mBuilding CXX object CMakeFiles/dis_homework1__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/dis_homework1/srv/detail/dds_fastrtps/custom_service__type_support.cpp.o[0m
+[2.461s] [ 46%] [32mBuilding CXX object CMakeFiles/dis_homework1__rosidl_typesupport_c.dir/rosidl_typesupport_c/dis_homework1/msg/custom_message__type_support.cpp.o[0m
+[2.462s] [ 48%] [32mBuilding CXX object CMakeFiles/dis_homework1__rosidl_typesupport_c.dir/rosidl_typesupport_c/dis_homework1/srv/custom_service__type_support.cpp.o[0m
+[2.501s] [ 51%] [32m[1mLinking CXX shared library libdis_homework1__rosidl_typesupport_c.so[0m
+[2.512s] [ 53%] [32mBuilding C object CMakeFiles/dis_homework1__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/dis_homework1/msg/detail/custom_message__type_support.c.o[0m
+[2.515s] [ 56%] [32mBuilding C object CMakeFiles/dis_homework1__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/dis_homework1/srv/detail/custom_service__type_support.c.o[0m
+[2.547s] [ 56%] Built target dis_homework1__rosidl_typesupport_c
+[2.567s] [ 58%] [32m[1mLinking C shared library libdis_homework1__rosidl_typesupport_introspection_c.so[0m
+[2.604s] [ 58%] Built target dis_homework1__rosidl_typesupport_introspection_c
+[2.608s] [ 61%] [32mBuilding CXX object CMakeFiles/dis_homework1__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/dis_homework1/msg/detail/custom_message__type_support_c.cpp.o[0m
+[2.611s] [ 64%] [32mBuilding CXX object CMakeFiles/dis_homework1__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/dis_homework1/srv/detail/custom_service__type_support_c.cpp.o[0m
+[2.751s] [ 66%] [32m[1mLinking CXX shared library libdis_homework1__rosidl_typesupport_cpp.so[0m
+[2.792s] [ 66%] Built target dis_homework1__rosidl_typesupport_cpp
+[2.890s] [ 69%] [32m[1mLinking CXX shared library libdis_homework1__rosidl_typesupport_introspection_cpp.so[0m
+[2.946s] [ 71%] [32m[1mLinking CXX shared library libdis_homework1__rosidl_typesupport_fastrtps_c.so[0m
+[2.969s] [ 71%] Built target dis_homework1__rosidl_typesupport_introspection_cpp
+[2.971s] [ 74%] [32m[1mLinking CXX shared library libdis_homework1__rosidl_typesupport_fastrtps_cpp.so[0m
+[3.019s] [ 74%] Built target dis_homework1__rosidl_typesupport_fastrtps_c
+[3.042s] [ 74%] Built target dis_homework1__rosidl_typesupport_fastrtps_cpp
+[3.059s] [ 74%] Built target dis_homework1
+[3.077s] [ 76%] [34m[1mGenerating Python code for ROS interfaces[0m
+[3.469s] [ 76%] Built target dis_homework1__py
+[3.487s] [ 82%] [32mBuilding C object CMakeFiles/dis_homework1__rosidl_generator_py.dir/rosidl_generator_py/dis_homework1/msg/_custom_message_s.c.o[0m
+[3.487s] [ 82%] [32mBuilding C object CMakeFiles/dis_homework1__rosidl_generator_py.dir/rosidl_generator_py/dis_homework1/srv/_custom_service_s.c.o[0m
+[3.588s] [ 84%] [32m[1mLinking C shared library rosidl_generator_py/dis_homework1/libdis_homework1__rosidl_generator_py.so[0m
+[3.624s] [ 84%] Built target dis_homework1__rosidl_generator_py
+[3.642s] [ 92%] [32mBuilding C object CMakeFiles/dis_homework1__rosidl_typesupport_c__pyext.dir/rosidl_generator_py/dis_homework1/_dis_homework1_s.ep.rosidl_typesupport_c.c.o[0m
+[3.642s] [ 92%] [32mBuilding C object CMakeFiles/dis_homework1__rosidl_typesupport_introspection_c__pyext.dir/rosidl_generator_py/dis_homework1/_dis_homework1_s.ep.rosidl_typesupport_introspection_c.c.o[0m
+[3.642s] [ 92%] [32mBuilding C object CMakeFiles/dis_homework1__rosidl_typesupport_fastrtps_c__pyext.dir/rosidl_generator_py/dis_homework1/_dis_homework1_s.ep.rosidl_typesupport_fastrtps_c.c.o[0m
+[3.739s] [ 97%] [32m[1mLinking C shared library rosidl_generator_py/dis_homework1/dis_homework1_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so[0m
+[3.739s] [ 97%] [32m[1mLinking C shared library rosidl_generator_py/dis_homework1/dis_homework1_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so[0m
+[3.740s] [100%] [32m[1mLinking C shared library rosidl_generator_py/dis_homework1/dis_homework1_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so[0m
+[3.775s] [100%] Built target dis_homework1__rosidl_typesupport_c__pyext
+[3.775s] [100%] Built target dis_homework1__rosidl_typesupport_fastrtps_c__pyext
+[3.775s] [100%] Built target dis_homework1__rosidl_typesupport_introspection_c__pyext
+[3.786s] Invoked command in '/home/xi/Documents/RINS/ROS2/build/dis_homework1' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/xi/Documents/RINS/ROS2/install/dis_tutorial2:/opt/ros/humble /usr/bin/cmake --build /home/xi/Documents/RINS/ROS2/build/dis_homework1 -- -j12 -l12
+[3.794s] Invoking command in '/home/xi/Documents/RINS/ROS2/build/dis_homework1': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/xi/Documents/RINS/ROS2/install/dis_tutorial2:/opt/ros/humble /usr/bin/cmake --install /home/xi/Documents/RINS/ROS2/build/dis_homework1
+[3.800s] -- Install configuration: ""
+[3.801s] -- Execute custom install script
+[3.801s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/ament_index/resource_index/rosidl_interfaces/dis_homework1
+[3.809s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/custom_message.h
+[3.816s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/detail/custom_message__functions.h
+[3.823s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/detail/custom_message__struct.h
+[3.831s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/detail/custom_message__type_support.h
+[3.838s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/rosidl_generator_c__visibility_control.h
+[3.845s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/srv/custom_service.h
+[3.853s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/srv/detail/custom_service__functions.h
+[3.860s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/srv/detail/custom_service__struct.h
+[3.867s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/srv/detail/custom_service__type_support.h
+[3.875s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/environment/library_path.sh
+[3.882s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/environment/library_path.dsv
+[3.890s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/detail/custom_message__rosidl_typesupport_fastrtps_c.h
+[3.897s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/rosidl_typesupport_fastrtps_c__visibility_control.h
+[3.904s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/srv/detail/custom_service__rosidl_typesupport_fastrtps_c.h
+[3.911s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/custom_message.hpp
+[3.919s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/detail/custom_message__builder.hpp
+[3.926s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/detail/custom_message__struct.hpp
+[3.933s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/detail/custom_message__traits.hpp
+[3.941s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/detail/custom_message__type_support.hpp
+[3.948s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/rosidl_generator_cpp__visibility_control.hpp
+[3.955s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/srv/custom_service.hpp
+[3.962s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/srv/detail/custom_service__builder.hpp
+[3.969s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/srv/detail/custom_service__struct.hpp
+[3.976s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/srv/detail/custom_service__traits.hpp
+[3.984s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/srv/detail/custom_service__type_support.hpp
+[3.991s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/detail/custom_message__rosidl_typesupport_fastrtps_cpp.hpp
+[3.998s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
+[4.005s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/srv/detail/custom_service__rosidl_typesupport_fastrtps_cpp.hpp
+[4.013s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/detail/custom_message__rosidl_typesupport_introspection_c.h
+[4.020s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/rosidl_typesupport_introspection_c__visibility_control.h
+[4.027s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/srv/detail/custom_service__rosidl_typesupport_introspection_c.h
+[4.035s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/msg/detail/custom_message__rosidl_typesupport_introspection_cpp.hpp
+[4.042s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/include/dis_homework1/dis_homework1/srv/detail/custom_service__rosidl_typesupport_introspection_cpp.hpp
+[4.050s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/environment/pythonpath.sh
+[4.057s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/environment/pythonpath.dsv
+[4.064s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1-0.0.0-py3.10.egg-info/PKG-INFO
+[4.072s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1-0.0.0-py3.10.egg-info/SOURCES.txt
+[4.079s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1-0.0.0-py3.10.egg-info/dependency_links.txt
+[4.086s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1-0.0.0-py3.10.egg-info/top_level.txt
+[4.094s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/__init__.py
+[4.101s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/_dis_homework1_s.ep.rosidl_typesupport_c.c
+[4.108s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/_dis_homework1_s.ep.rosidl_typesupport_fastrtps_c.c
+[4.116s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/_dis_homework1_s.ep.rosidl_typesupport_introspection_c.c
+[4.123s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/dis_homework1_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[4.130s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/dis_homework1_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[4.138s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/dis_homework1_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[4.145s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/libdis_homework1__rosidl_generator_py.so
+[4.153s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/msg/__init__.py
+[4.160s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/msg/_custom_message.py
+[4.167s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/msg/_custom_message_s.c
+[4.174s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/srv/__init__.py
+[4.181s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/srv/_custom_service.py
+[4.188s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/srv/_custom_service_s.c
+[4.196s] -- Up-to-date symlink: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/dis_homework1_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so
+[4.196s] -- Up-to-date symlink: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/dis_homework1_s__rosidl_typesupport_introspection_c.cpython-310-x86_64-linux-gnu.so
+[4.196s] -- Up-to-date symlink: /home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/dis_homework1_s__rosidl_typesupport_c.cpython-310-x86_64-linux-gnu.so
+[4.196s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/msg/CustomMessage.idl
+[4.204s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/srv/CustomService.idl
+[4.211s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/msg/CustomMessage.msg
+[4.218s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/srv/CustomService.srv
+[4.225s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/srv/CustomService_Request.msg
+[4.233s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/srv/CustomService_Response.msg
+[4.240s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/dis_homework1/custom_publisher.py
+[4.248s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/dis_homework1/custom_subscriber.py
+[4.255s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/dis_homework1/custom_server.py
+[4.262s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/ament_index/resource_index/package_run_dependencies/dis_homework1
+[4.270s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/ament_index/resource_index/parent_prefix_path/dis_homework1
+[4.277s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/environment/ament_prefix_path.sh
+[4.284s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/environment/ament_prefix_path.dsv
+[4.292s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/environment/path.sh
+[4.299s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/environment/path.dsv
+[4.307s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/local_setup.bash
+[4.314s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/local_setup.sh
+[4.321s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/local_setup.zsh
+[4.329s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/local_setup.dsv
+[4.337s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/package.dsv
+[4.344s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/ament_index/resource_index/packages/dis_homework1
+[4.352s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/rosidl_cmake-extras.cmake
+[4.359s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/ament_cmake_export_dependencies-extras.cmake
+[4.367s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/ament_cmake_export_include_directories-extras.cmake
+[4.374s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/ament_cmake_export_libraries-extras.cmake
+[4.381s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/ament_cmake_export_targets-extras.cmake
+[4.388s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake
+[4.396s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+[4.403s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/dis_homework1Config.cmake
+[4.410s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/dis_homework1Config-version.cmake
+[4.418s] -- Symlinking: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/package.xml
+[4.425s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/libdis_homework1__rosidl_generator_c.so
+[4.425s] -- Set runtime path of "/home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/libdis_homework1__rosidl_generator_c.so" to ""
+[4.425s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/libdis_homework1__rosidl_typesupport_fastrtps_c.so
+[4.426s] -- Set runtime path of "/home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/libdis_homework1__rosidl_typesupport_fastrtps_c.so" to ""
+[4.426s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/libdis_homework1__rosidl_typesupport_fastrtps_cpp.so
+[4.426s] -- Set runtime path of "/home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/libdis_homework1__rosidl_typesupport_fastrtps_cpp.so" to ""
+[4.426s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/libdis_homework1__rosidl_typesupport_introspection_c.so
+[4.427s] -- Set runtime path of "/home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/libdis_homework1__rosidl_typesupport_introspection_c.so" to ""
+[4.427s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/libdis_homework1__rosidl_typesupport_c.so
+[4.427s] -- Set runtime path of "/home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/libdis_homework1__rosidl_typesupport_c.so" to ""
+[4.427s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/libdis_homework1__rosidl_typesupport_introspection_cpp.so
+[4.427s] -- Set runtime path of "/home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/libdis_homework1__rosidl_typesupport_introspection_cpp.so" to ""
+[4.428s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/libdis_homework1__rosidl_typesupport_cpp.so
+[4.428s] -- Set runtime path of "/home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/libdis_homework1__rosidl_typesupport_cpp.so" to ""
+[4.461s] Listing '/home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1'...
+[4.461s] Compiling '/home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/__init__.py'...
+[4.461s] Listing '/home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/msg'...
+[4.461s] Compiling '/home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/msg/__init__.py'...
+[4.461s] Compiling '/home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/msg/_custom_message.py'...
+[4.461s] Listing '/home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/srv'...
+[4.461s] Compiling '/home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/srv/__init__.py'...
+[4.461s] Compiling '/home/xi/Documents/RINS/ROS2/install/dis_homework1/local/lib/python3.10/dist-packages/dis_homework1/srv/_custom_service.py'...
+[4.465s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/libdis_homework1__rosidl_generator_py.so
+[4.465s] -- Set runtime path of "/home/xi/Documents/RINS/ROS2/install/dis_homework1/lib/libdis_homework1__rosidl_generator_py.so" to ""
+[4.466s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/export_dis_homework1__rosidl_generator_cExport.cmake
+[4.466s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/export_dis_homework1__rosidl_generator_cExport-noconfig.cmake
+[4.466s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/export_dis_homework1__rosidl_typesupport_fastrtps_cExport.cmake
+[4.466s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/export_dis_homework1__rosidl_typesupport_fastrtps_cExport-noconfig.cmake
+[4.466s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/export_dis_homework1__rosidl_generator_cppExport.cmake
+[4.466s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/export_dis_homework1__rosidl_typesupport_fastrtps_cppExport.cmake
+[4.466s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/export_dis_homework1__rosidl_typesupport_fastrtps_cppExport-noconfig.cmake
+[4.467s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/dis_homework1__rosidl_typesupport_introspection_cExport.cmake
+[4.467s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/dis_homework1__rosidl_typesupport_introspection_cExport-noconfig.cmake
+[4.467s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/dis_homework1__rosidl_typesupport_cExport.cmake
+[4.467s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/dis_homework1__rosidl_typesupport_cExport-noconfig.cmake
+[4.467s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/dis_homework1__rosidl_typesupport_introspection_cppExport.cmake
+[4.467s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/dis_homework1__rosidl_typesupport_introspection_cppExport-noconfig.cmake
+[4.467s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/dis_homework1__rosidl_typesupport_cppExport.cmake
+[4.468s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/dis_homework1__rosidl_typesupport_cppExport-noconfig.cmake
+[4.468s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/export_dis_homework1__rosidl_generator_pyExport.cmake
+[4.468s] -- Installing: /home/xi/Documents/RINS/ROS2/install/dis_homework1/share/dis_homework1/cmake/export_dis_homework1__rosidl_generator_pyExport-noconfig.cmake
+[4.470s] Invoked command in '/home/xi/Documents/RINS/ROS2/build/dis_homework1' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/home/xi/Documents/RINS/ROS2/install/dis_tutorial2:/opt/ros/humble /usr/bin/cmake --install /home/xi/Documents/RINS/ROS2/build/dis_homework1

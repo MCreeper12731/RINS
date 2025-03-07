@@ -40,6 +40,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 install(PROGRAMS
   dis_homework1/custom_publisher.py
   dis_homework1/custom_subscriber.py
+  dis_homework1/custom_server.py
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)

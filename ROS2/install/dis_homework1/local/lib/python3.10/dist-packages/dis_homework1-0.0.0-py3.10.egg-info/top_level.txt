@@ -1,0 +1,1 @@
+/home/xi/Documents/RINS/ROS2/build/dis_homework1/ament_cmake_python/dis_homework1/dis_homework1.egg-info/top_level.txt

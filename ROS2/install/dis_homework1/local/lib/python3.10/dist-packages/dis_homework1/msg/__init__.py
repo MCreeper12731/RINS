@@ -1,0 +1,1 @@
+/home/xi/Documents/RINS/ROS2/build/dis_homework1/rosidl_generator_py/dis_homework1/msg/__init__.py

@@ -1,0 +1,1 @@
+/home/xi/Documents/RINS/ROS2/build/dis_homework1/rosidl_generator_c/dis_homework1/srv/detail/custom_service__struct.h

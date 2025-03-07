@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "dis_homework1__py",
+		"source" : "/home/xi/Documents/RINS/ROS2/build/dis_homework1/dis_homework1__py"
+	}
+}
