@@ -1,0 +1,10 @@
+# Debugging
+chmod
+source
+delete install/build/log
+colcon build --symlink-install --packages-select <pkg-name>
+.bashrc
+
+# Remember
+add new files to CMake.txt
+use folder structure from dis_tutorial1
