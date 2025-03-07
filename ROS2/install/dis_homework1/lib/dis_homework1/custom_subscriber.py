@@ -1,1 +1,0 @@
-/home/xi/Documents/RINS/ROS2/src/dis_homework1/dis_homework1/custom_subscriber.py

@@ -1,7 +1,0 @@
-{
-  "package_name": "dis_homework1",
-  "non_idl_tuples": [
-    "/home/xi/Documents/RINS/ROS2/src/dis_homework1:msg/CustomMessage.msg",
-    "/home/xi/Documents/RINS/ROS2/src/dis_homework1:srv/CustomService.srv"
-  ]
-}

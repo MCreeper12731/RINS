@@ -1,5 +1,0 @@
-string field1
-int64[10] field2
----
-string field3
-int64 field4

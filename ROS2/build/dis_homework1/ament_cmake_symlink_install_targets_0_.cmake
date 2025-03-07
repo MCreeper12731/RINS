@@ -1,1 +1,0 @@
-ament_cmake_symlink_install_targets("TARGET_FILES" "/home/xi/Documents/RINS/ROS2/build/dis_homework1/rosidl_generator_py/dis_homework1/dis_homework1_s__rosidl_typesupport_fastrtps_c.cpython-310-x86_64-linux-gnu.so" "TARGETS" "dis_homework1__rosidl_typesupport_fastrtps_c__pyext" "DESTINATION" "local/lib/python3.10/dist-packages/dis_homework1")

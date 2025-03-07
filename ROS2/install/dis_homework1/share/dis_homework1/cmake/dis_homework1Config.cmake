@@ -1,1 +1,0 @@
-/home/xi/Documents/RINS/ROS2/build/dis_homework1/ament_cmake_core/dis_homework1Config.cmake

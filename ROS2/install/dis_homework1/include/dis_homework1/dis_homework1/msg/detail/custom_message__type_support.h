@@ -1,1 +1,0 @@
-/home/xi/Documents/RINS/ROS2/build/dis_homework1/rosidl_generator_c/dis_homework1/msg/detail/custom_message__type_support.h
