@@ -1,0 +1,5 @@
+string command
+int64 duration
+---
+string prev_command
+
