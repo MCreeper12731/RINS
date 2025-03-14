@@ -5,7 +5,7 @@ import numpy as np
 import random
 
 from rclpy.node import Node
-from std_msgs.msg import String
+from std_msgs.msg import String, Bool
 from geometry_msgs.msg import Twist
 from turtlesim.msg import Pose as TurtlePose
 
@@ -23,20 +23,24 @@ class GoToPose(Node):
         self.goal_pose = None
         self.current_pose = None
         self.new_goal = False
+        self.prev_dist_to_goal = 0
         
         # ROS communications
-        self.server = self.create_subscription(TurtlePose, 'goal_pose', self.set_goal, 10)
-        self.server = self.create_subscription(TurtlePose, 'pose', self.new_pose, 1)
-        self.publisher = self.create_publisher(Twist, "cmd_vel", 10)
+        self.server = self.create_subscription(TurtlePose, "goal_pose", self.set_goal, 10)
+        self.server = self.create_subscription(TurtlePose, "turtle1/pose", self.new_pose, 1)
+        self.vel_publisher = self.create_publisher(Twist, "turtle1/cmd_vel", 10)
+        self.goal_publisher = self.create_publisher(Bool, "goal_arrived", 10)
 
         # Timer to execute the node
         self.timer = self.create_timer(self.timer_period, self.timer_callback)
 
     ### Topic response functions
     def set_goal(self, posemsg):
+        
         self.goal_pose = [posemsg.x, posemsg.y, posemsg.theta]
+        
         self.new_goal = True
-        self.get_logger().info(f"A goal has been set!")
+        self.get_logger().info(f"A goal has been set to {self.goal_pose}!")
 
     def new_pose(self, posemsg):
         self.current_pose = [posemsg.x, posemsg.y, posemsg.theta]
@@ -47,12 +51,13 @@ class GoToPose(Node):
         cmd_msg = Twist()
         cmd_msg.linear.x = lin
         cmd_msg.angular.z = ang
-        self.publisher.publish(cmd_msg)
+        self.vel_publisher.publish(cmd_msg)
         self.get_logger().info(f"I published a Twist command lin:{cmd_msg.linear.x}, ang:{cmd_msg.angular.z}")
         self.counter += 1
 
     ### Execution control functions
     def timer_callback(self):
+        
         if self.new_goal and not self.current_pose is None:
             self.get_logger().info(f"Calculating a control action")
             lin, ang = self.get_command()
@@ -74,43 +79,51 @@ class GoToPose(Node):
             if np.abs(angle_error)<0.05: # Target angle is reached!
                 self.goal_phase = 1
                 ang = 0.
-            elif np.abs(angle_error)<0.5:
+            elif np.abs(angle_error)<0.2:
                 if angle_error>0:
                     ang = 0.1
                 else:
                     ang = -0.1
+            elif np.abs(angle_error)<0.4:
+                if angle_error>0:
+                    ang = .2
+                else:
+                    ang = -.2
             else:
                 if angle_error>0:
-                    ang = 0.5
+                    ang = .4
                 else:
-                    ang = -0.5
+                    ang = -.4
 
         elif self.goal_phase == 1: # Then, we move towards the goal pose
             dist_to_goal = np.sqrt((self.current_pose[1] - self.goal_pose[1])**2 + 
                                    (self.current_pose[0] - self.goal_pose[0])**2)
+            if dist_to_goal > self.prev_dist_to_goal and self.prev_dist_to_goal != 0:
+                self.goal_phase = 0
+            self.prev_dist_to_goal = dist_to_goal
             self.get_logger().info(f"PHASE 2, POSITION ERROR: {dist_to_goal}")
-            if np.abs(dist_to_goal)<0.1: # Goal position is reached!
+            if np.abs(dist_to_goal)<0.3: # Goal position is reached!
                 self.goal_phase = 2
                 lin = 0.
             elif np.abs(dist_to_goal)<0.5:
-                lin = 0.1
-            else:
+                lin = 0.02
+            elif np.abs(dist_to_goal)<2.:
                 lin = 1.
+            else:
+                lin = 2.
 
         elif self.goal_phase == 2: # Finally, we should rotate the turtle in the goal rotation
             angle_error = self.goal_pose[2] - self.current_pose[2]
             self.get_logger().info(f"Phase 3 of reaching a goal! Angular error is {angle_error}")
 
-            if np.abs(angle_error)<0.05: # Target angle is reached!
-                self.get_logger().info(f"Goal has been reached!")
-                self.goal_phase = 0
-                self.new_goal = False
-                ang = 0.
-            else:
-                if angle_error>0:
-                    ang = 0.1
-                else:
-                    ang = -0.1
+            self.get_logger().info(f"Goal has been reached!")
+            self.goal_phase = 0
+            self.new_goal = False
+            goal_message = Bool()
+            goal_message.data = True
+            self.goal_publisher.publish(goal_message)
+            ang = 0.
+
 
         self.get_logger().info(f"Current position: {self.current_pose}")
 

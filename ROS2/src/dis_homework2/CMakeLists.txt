@@ -38,6 +38,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 
 install(PROGRAMS
   dis_homework2/move_service.py
+  dis_homework2/move_service_old.py
   dis_homework2/go_to_position_simple_node.py
   DESTINATION lib/${PROJECT_NAME})
 
