@@ -1,3 +1,0 @@
-ros2 topic pub <topic_name> <message_type>
-ros2 interface show <message_type>
-ros2 service call <service_name> <service_type> <json_parameters>
