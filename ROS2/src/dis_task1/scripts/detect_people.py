@@ -77,6 +77,7 @@ class detect_faces(Node):
 				cv_image = cv2.circle(cv_image, (cx,cy), 5, self.detection_color, -1)
 
 				self.faces.append((cx,cy))
+				print("list:", self.faces)
 
 				marker = Marker()
 
@@ -115,12 +116,15 @@ class detect_faces(Node):
 			print(e)
 
 	def pointcloud_callback(self, data):
-		# get point cloud attributes
 		height = data.height
 		width = data.width
 		a = pc2.read_points_numpy(data, field_names=("x", "y", "z"))
 		a = a.reshape((height, width, 3))
 
+		# Assume camera (or sensor) position in the /base_link frame.
+		# You might need to adjust this if your camera is offset.
+		camera_position = np.array([0.0, 0.0, 0.0])
+		
 		for x, y in self.faces:
 			window_size = 5  # Adjust window size if necessary
 			points = []
@@ -132,27 +136,30 @@ class detect_faces(Node):
 			points = np.array(points)
 			
 			if points.shape[0] >= 3:
-				# Calculate the centroid of the points
 				centroid = np.mean(points, axis=0)
 				pts_centered = points - centroid
 
-				# Compute SVD to get the plane's normal vector
 				U, S, Vt = np.linalg.svd(pts_centered)
 				normal = Vt[-1, :]
 				normal = normal / np.linalg.norm(normal)
 
-				# Define an offset distance (in meters) to move the marker in front of the face
-				offset_distance = 0.4 # Adjust this distance as needed
-				# Offset marker position: new_position = centroid + (offset_distance * normal)
+				vec_to_camera = camera_position - centroid
+				if np.dot(normal, vec_to_camera) < 0:
+					normal = -normal
+
+				
+				offset_distance = 0.4  
 				new_position = centroid + offset_distance * normal
 
-				self.get_logger().info(f"Face normal: {normal}, Offset position: {new_position}")
+				self.get_logger().info(
+					f"Face normal: {normal}, Centroid: {centroid}, Offset position: {new_position}"
+				)
 
-				# Create and publish the marker using the offset position
+				
 				marker = Marker()
 				marker.header.frame_id = "/base_link"
 				marker.header.stamp = data.header.stamp
-				marker.type = 2
+				marker.type = 2 
 				marker.id = 0
 
 				scale = 0.1
@@ -169,6 +176,7 @@ class detect_faces(Node):
 				marker.pose.position.y = float(new_position[1])
 				marker.pose.position.z = float(new_position[2])
 				self.marker_pub.publish(marker)
+
 
 
 def main():

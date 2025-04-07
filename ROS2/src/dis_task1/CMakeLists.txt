@@ -31,6 +31,8 @@ install(PROGRAMS
   scripts/robot_commander.py
   scripts/face_locator.py
   scripts/sweeper.py
+  scripts/detect_rings.py
+  scripts/ring_locator.py
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()

@@ -69,9 +69,10 @@ class FaceLocator(Node):
         if not self.check_detected(face_abs_pos):
             self.faces.append(face_abs_pos)
             self.get_logger().info(str(len(self.faces)))
-            # with open("../face_locations.txt", "w") as self.faces_file:
-            #     for face in self.faces:
-            #         self.faces_file.write(f"{face.x} {face.y} {face.z}\n")
+            #with open("../face_locations.txt", "w") as self.faces_file:
+            #    for face in self.faces:
+            #        self.faces_file.write(f"{face.x} {face.y} {face.z}\n")
+            self.goto_face(face_abs_pos)
             
     
 
@@ -121,7 +122,6 @@ class FaceLocator(Node):
     def check_detected(self, point):
         for i, f in enumerate(self.faces):
             if self.distance(f, point) < self.delta:
-                # Optionally update the stored face coordinate to be the average of the old and new detections
                 self.faces[i].x = (f.x + point.x) / 2.0
                 self.faces[i].y = (f.y + point.y) / 2.0
                 self.faces[i].z = (f.z + point.z) / 2.0
