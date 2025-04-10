@@ -6,8 +6,7 @@ from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data, QoSReliabilityPolicy, QoSDurabilityPolicy, QoSHistoryPolicy
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy
 
-from sensor_msgs.msg import Image, PointCloud2
-from sensor_msgs_py import point_cloud2 as pc2
+from sensor_msgs.msg import Image
 
 from visualization_msgs.msg import Marker
 
@@ -16,8 +15,6 @@ import cv2
 import numpy as np
 
 from ultralytics import YOLO
-
-import tf2_ros
 
 from geometry_msgs.msg import PointStamped, Vector3, Pose
 from visualization_msgs.msg import Marker, MarkerArray
@@ -53,7 +50,6 @@ class detect_rings(Node):
 
         self.image_sub = self.create_subscription(Image, "/oakd/rgb/preview/image_raw", self.image_callback, 1)
         self.depth_sub = self.create_subscription(Image, "/oakd/rgb/preview/depth", self.depth_callback, 1)
-        self.pointcloud_sub = self.create_subscription(PointCloud2, "/oakd/rgb/preview/depth/points", self.pointcloud_callback, qos_profile_sensor_data)
 
         self.marker_pub = self.create_publisher(Marker, marker_topic, QoSReliabilityPolicy.BEST_EFFORT)
         
@@ -82,12 +78,10 @@ class detect_rings(Node):
         )
 
         self.get_logger().info(f"Node has been initialized! Will publish face markers to {marker_topic}.")
+
         
-        #cv2.namedWindow("Binary Image", cv2.WINDOW_NORMAL)
         cv2.namedWindow("Detected contours", cv2.WINDOW_NORMAL)
         cv2.namedWindow("Detected rings", cv2.WINDOW_NORMAL)
-        #cv2.namedWindow("Depth window", cv2.WINDOW_NORMAL)   
-        cv2.namedWindow("Ring color", cv2.WINDOW_NORMAL)   
 
     def camera_info_callback(self, msg):
         self.fx = msg.k[0]
@@ -95,6 +89,13 @@ class detect_rings(Node):
         self.cx = msg.k[2]
         self.cy = msg.k[5]
         self.camera_info_received = True
+
+    def is_circular(ellipse, tolerance=0.2):
+        major = ellipse[1][1]
+        minor = ellipse[1][0]
+        ratio = minor / major if major != 0 else 0
+        return ratio > (1 - tolerance)
+
 
     def image_callback(self, data):
         #self.get_logger().info(f"I got a new image! Will try to find rings...")
@@ -104,78 +105,96 @@ class detect_rings(Node):
         except CvBridgeError as e:
             print(e)
 
-        blue = cv_image[:,:,0]
-        green = cv_image[:,:,1]
-        red = cv_image[:,:,2]
-
-        ## for red rings
-
-        # set color range for HSV red
+        masks = []
         hsv = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+
+        # Red color ranges
         lower_red1 = np.array([0, 70, 50])
         upper_red1 = np.array([10, 255, 255])
 
         lower_red2 = np.array([170, 70, 50])
         upper_red2 = np.array([180, 255, 255])
 
-        # masks for red
-        mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
-        mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
-        mask_red = cv2.bitwise_or(mask1, mask2)
-
-        # connect gaps
-        kernel = np.ones((5, 5), np.uint8)
-
-        # phological closing
-        mask_red = cv2.morphologyEx(mask_red, cv2.MORPH_CLOSE, kernel)
-
-        #cv2.imshow("Red Mask", mask_red)
-        #cv2.waitKey(1)
-
-        thresh_red = mask_red
-
-        ## for 3D rings (dark green)
-        hsv = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-
-        # dark green hsv
+        # Green color ranges
         lower_green = np.array([45, 30, 15])
         upper_green = np.array([90, 255, 150])
 
+        # Blue color ranges
+        lower_blue = np.array([90, 50, 50])
+        upper_blue = np.array([140, 255, 200])
+
+        # Yellow color ranges
+        lower_yellow = np.array([20, 100, 100])
+        upper_yellow = np.array([40, 255, 255])
+
+        # Orange color ranges
+        lower_orange = np.array([5, 150, 150])
+        upper_orange = np.array([25, 255, 255])
+
+        # Black color ranges
+        lower_black = np.array([0, 0, 0])
+        upper_black = np.array([180, 255, 50])
+
+        # White color ranges
+        lower_white = np.array([0, 0, 200])
+        upper_white = np.array([180, 30, 255])
+
+
+
+        # Red ring detection
+        mask1 = cv2.inRange(hsv, lower_red1, upper_red1)
+        mask2 = cv2.inRange(hsv, lower_red2, upper_red2)
+        mask_red = cv2.bitwise_or(mask1, mask2)
+        thresh_red = cv2.adaptiveThreshold(mask_red, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 5, 20)
+        masks.append([thresh_red, "RED"])
+
+        # Green ring detection
         mask_green = cv2.inRange(hsv, lower_green, upper_green)
+        thresh_green = cv2.adaptiveThreshold(mask_green, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 5, 20)
+        masks.append([thresh_green, "GREEN"])
 
-        # connect gaps
-        kernel = np.ones((5, 5), np.uint8)
+        # Blue ring detection
+        mask_blue = cv2.inRange(hsv, lower_blue, upper_blue)
+        thresh_blue = cv2.adaptiveThreshold(mask_blue, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 5, 20)
+        masks.append([thresh_blue, "BLUE"])
 
-        # morphological closing
-        mask_green = cv2.morphologyEx(mask_green, cv2.MORPH_CLOSE, kernel)
+        # Yellow ring detection
+        mask_yellow = cv2.inRange(hsv, lower_yellow, upper_yellow)
+        thresh_yellow = cv2.adaptiveThreshold(mask_yellow, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 5, 20)
+        masks.append([thresh_yellow, "YELLOW"])
+
+        # Orange ring detection
+        mask_orange = cv2.inRange(hsv, lower_orange, upper_orange)
+        thresh_orange = cv2.adaptiveThreshold(mask_orange, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 5, 20)
+        masks.append([thresh_orange, "ORANGE"])
+
+        # Black ring detection
+        mask_black = cv2.inRange(hsv, lower_black, upper_black)
+        thresh_black = cv2.adaptiveThreshold(mask_black, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 5, 20)
+        masks.append([thresh_black, "BLACK"])
+
+        # White ring detection
+        mask_white = cv2.inRange(hsv, lower_white, upper_white)
+        thresh_white = cv2.adaptiveThreshold(mask_white, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 5, 20)
+        masks.append([thresh_white, "WHITE"])
 
 
-        darkgreen_thresh = mask_green
-
-        #cv2.imshow("Dark Green Mask", mask_green)
-        #cv2.waitKey(1)
-
-
-        ## for other rings (green)
+        ## for other rings
 
         # Tranform image to grayscale
         gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
-        # gray = red
 
-        # Apply Gaussian Blur
-        #gray = cv2.GaussianBlur(gray,(3,3),0)
-        
-        # Do histogram equalization
-        #gray = cv2.equalizeHist(gray)
 
-        # Binarize the image, there are different ways to do it
-        #ret, thresh = cv2.threshold(img, 50, 255, 0)
-        #ret, thresh = cv2.threshold(img, 70, 255, cv2.THRESH_BINARY)
+        # connect gaps
+        for i in range(len(masks)):
+            kernel = np.ones((3, 3), np.uint8)
+            masks[i][0] = cv2.morphologyEx(masks[i][0], cv2.MORPH_CLOSE, kernel)
 
-        thresh_main = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 15, 30)
+        thresh_main = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 15, 30)
 
-        #cv2.imshow("Binary Image", thresh_main)
-        #cv2.waitKey(1)
+        kernel = np.ones((5, 5), np.uint8)
+        thresh_main = cv2.morphologyEx(thresh_main, cv2.MORPH_CLOSE, kernel)
+
         # Extract contours
         contours, hierarchy = cv2.findContours(thresh_main, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -191,24 +210,17 @@ class detect_rings(Node):
             #    print cnt.shape
             if cnt.shape[0] >= 20:
                 ellipse = cv2.fitEllipse(cnt)
-                elps.append(ellipse)
+                elps.append((ellipse, "MAIN"))
 
 
-        contours_red, hierarchy = cv2.findContours(thresh_red, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-        for cnt in contours_red:
-            #    print cnt
-            #    print cnt.shape
-            if cnt.shape[0] >= 20:
-                ellipse = cv2.fitEllipse(cnt)
-                elps.append(ellipse)
-
-        contours_darkgreen, hierarchy = cv2.findContours(darkgreen_thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-        for cnt in contours_darkgreen:
-            #    print cnt
-            #    print cnt.shape
-            if cnt.shape[0] >= 20:
-                ellipse = cv2.fitEllipse(cnt)
-                elps.append(ellipse)
+        for mask, color in masks:
+            contours_specific, hierarchy = cv2.findContours(mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+            for cnt in contours_specific:
+                #    print cnt
+                #    print cnt.shape
+                if cnt.shape[0] >= 20:
+                    ellipse = cv2.fitEllipse(cnt)
+                    elps.append((ellipse, color))
 
 
         # Find two elipses with same centers
@@ -216,9 +228,9 @@ class detect_rings(Node):
         for n in range(len(elps)):
             for m in range(n + 1, len(elps)):
                 # e[0] is the center of the ellipse (x,y), e[1] are the lengths of major and minor axis (major, minor), e[2] is the rotation in degrees
-                
-                e1 = elps[n]
-                e2 = elps[m]
+
+                e1 = elps[n][0]
+                e2 = elps[m][0]
                 dist = np.sqrt(((e1[0][0] - e2[0][0]) ** 2 + (e1[0][1] - e2[0][1]) ** 2))
                 angle_diff = np.abs(e1[2] - e2[2])
 
@@ -251,13 +263,21 @@ class detect_rings(Node):
                 border_diff = np.abs(border_major - border_minor)
 
                 # should be circular enough
+                #print(e1_major_axis, e1_minor_axis * 2, e2_major_axis, e2_minor_axis * 2)
                 if(e1_major_axis > e1_minor_axis * 2):
                     continue
                 if(e2_major_axis > e2_minor_axis * 2):
                     continue
+                
+                # rings should be similiar size, not too different
+                if(e1_minor_axis > e2_minor_axis * 1.6):
+                    return
+                if(e1_major_axis > e2_major_axis * 1.6):
+                    return
 
                 # should be big enough (so no QR code)
-                if(e1_major_axis < 20 or e2_major_axis < 20):
+                if(e1_major_axis < 12 or e2_major_axis < 12):
+                    #print(e1_major_axis, e2_major_axis)
                     continue
 
                 #print("Ellipse", e1_minor_axis, e1_major_axis, e2_minor_axis, e2_major_axis, dist, angle_diff, border_diff, border_minor, border_major)
@@ -265,7 +285,7 @@ class detect_rings(Node):
                 if border_diff>2:
                     continue
                 
-                candidates.append((e1,e2))
+                candidates.append(((e1,e2), elps[m][1]))
                 
         if(len(candidates) != 0):
             #print("Processing is done! found", len(candidates), "candidates for rings.")
@@ -276,8 +296,8 @@ class detect_rings(Node):
         for c in candidates:
 
             # the centers of the ellipses
-            e1 = c[0]
-            e2 = c[1]
+            e1 = c[0][0]
+            e2 = c[0][1]
 
             # Safe image for visualization
             viz_image = cv_image.copy()
@@ -325,12 +345,16 @@ class detect_rings(Node):
             #print("Found candidate:", r, g, b)
             ring = {
                 "pos": (int(e1[0][0]), int(e1[0][1])),
-                "color": (r, g, b)
+                "color": (r, g, b),
+                "viz_image": viz_image,
+                "image": cv_image,
+                "mask": mask,
+                "original_color": c[1]
             }
             self.rings.append(ring)
 
 
-            #DEBUG RING COLO
+            #DEBUG RING COLOR
             text = str((r, g, b))
             coordinates = (10,100)
             font = cv2.FONT_HERSHEY_SIMPLEX
@@ -342,8 +366,25 @@ class detect_rings(Node):
 
             ring_only = cv2.putText(ring_only, text, coordinates, font, fontScale, color, thickness, cv2.LINE_AA)
 
-            cv2.imshow("Ring color", ring_only)
-            cv2.waitKey(1)
+            #cv2.imshow("Ring color", ring_only)
+            #cv2.waitKey(1)
+
+            ### CHECKING FOR SPHERE
+            # Check the center pixel inside the smaller ellipse
+            center_x, center_y = int(e2[0][0]), int(e2[0][1])  # smaller inner ellipse center
+
+            # Ensure center pixel is in image bounds
+            if 0 <= center_y < cv_image.shape[0] and 0 <= center_x < cv_image.shape[1]:
+                center_pixel_color = cv_image[center_y, center_x].astype(int)
+                center_r, center_g, center_b = center_pixel_color
+
+                # Compute Euclidean distance in RGB color space
+                color_distance = np.linalg.norm(np.array([r, g, b]) - np.array([center_r, center_g, center_b]))
+
+                # If color is too similar, it's probably a sphere, not a ring
+                if color_distance < 30:  # adjust threshold if needed
+                    continue  # skip this candidate
+
 
 
             # Get a bounding box, around the first ellipse ('average' of both elipsis)
@@ -362,34 +403,6 @@ class detect_rings(Node):
             y_min = y1 if y1 > 0 else 0
             y_max = y2 if y2 < cv_image.shape[1] else cv_image.shape[1]
 
-        if len(candidates)>0:
-                cv2.imshow("Detected rings",viz_image)
-                cv2.waitKey(1)
-
-    
-    def add_ring(self, input_ring):
-        new_ring = input_ring["pos"]
-        # Define a distance threshold for what counts as "too close"
-        distance_threshold = 2
-        
-        # Check if the new ring is too close to any existing ring
-        for ring_dict in self.rings:
-            existing_ring = ring_dict["pos"]
-            distance = self.calculate_distance(new_ring, existing_ring)
-            if distance < distance_threshold:
-                #print("Ring is too close to an existing ring, skipping addition.")
-                return  # Skip adding this ring
-        
-        # If the ring is far enough, add it to the list
-        input_ring["pos"] = (int(new_ring[0]), int(new_ring[1]))
-        self.rings.append(input_ring)
-        #print(f"Added new ring at {input_ring}")
-
-    def calculate_distance(self, ring1, ring2):
-        # Calculate Euclidean distance between two rings (given as [x, y, z] coordinates)
-        x1, y1 = ring1
-        x2, y2 = ring2
-        return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
     def depth_callback(self, data):
         try:
@@ -397,8 +410,10 @@ class detect_rings(Node):
         except CvBridgeError as e:
             print(e)
             return
+        
 
         # Set invalid depth (inf) values to 0
+        old_depth_image = depth_image.copy()
         depth_image[np.isinf(depth_image)] = 0
 
         # Set the minimum depth threshold to filter out sky or invalid areas
@@ -410,6 +425,10 @@ class detect_rings(Node):
         fy = self.fy  # Focal length in y (in pixels)
         cx = self.cx  # Optical center x (in pixels)
         cy = self.cy  # Optical center y (in pixels)
+
+        if None in (self.fx, self.fy, self.cx, self.cy):
+            #print("Camera intrinsics not yet received, skipping depth callback")
+            return
 
         for ring in self.rings:
             cx_ring, cy_ring = ring["pos"]  # Center pixel
@@ -444,13 +463,41 @@ class detect_rings(Node):
                             ring_points_3d.append([x, y, z])
 
             # If we have valid 3D points, compute the average position of the ring
+            # Check if we have valid 3D points on the ring
+
             if ring_points_3d:
+                # Get center depth at the ellipse center
+                if 0 <= cx_ring < depth_image.shape[1] and 0 <= cy_ring < depth_image.shape[0]:
+                    depth_center = depth_image[cy_ring, cx_ring]
+                else:
+                    continue  # Skip if out of bounds
+
+                # Clean and analyze ring depth
+                ring_zs = [pt[2] for pt in ring_points_3d if np.isfinite(pt[2])]
+                if not ring_zs:
+                    continue  # No valid depths on ring
+
+                depth_ring_median = np.median(ring_zs)
+
+                #print(depth_center, depth_ring_median)
+
+                # If center is invalid or farther away than the ring, it's probably a ring not a sphere
+                if(depth_center * 0.9 > depth_ring_median or depth_center == 0):
+                    print(f" FOUND RING({cx_ring}, {cy_ring}) — depth_center={depth_center}, ring_median={depth_ring_median}, old: {old_depth_image[cy_ring, cx_ring]}, color: {ring['color']}, likely color: {self.classify_color(ring['color'])}, original color: {ring['original_color']}")
+                    pass
+                else:
+                    #print(f" Skipping sphere at ({cx_ring}, {cy_ring}) — depth_center={depth_center} >= ring_median={depth_ring_median}, depth * 0.9: {depth_center * 0.9}")
+                    continue
+
+                if(ring['original_color'] != self.classify_color(ring['color'])):
+                    continue
+
+                # Passed the check — this is likely a ring
                 position = np.mean(ring_points_3d, axis=0)
                 r, g, b = ring["color"]  # RGB values for the ring
 
-                # Publish a marker for visualization
                 marker = Marker()
-                marker.header.frame_id = "camera_link"  # or whatever frame your depth image is in
+                marker.header.frame_id = "camera_link"
                 marker.header.stamp = data.header.stamp
                 marker.type = Marker.SPHERE
                 marker.id = 0
@@ -461,133 +508,69 @@ class detect_rings(Node):
                 marker.color.b = float(b)
                 marker.color.a = 1.0
 
-                # Set the marker pose based on the calculated position
                 marker.pose.position.x = float(position[0])
                 marker.pose.position.y = float(position[1])
                 marker.pose.position.z = float(position[2])
 
                 self.marker_pub.publish(marker)
 
-                #self.rings_global.append({
-                #    "pos": position,
-                #    "color": ring["color"]
-                #})
+                cv2.imshow("Detected rings",ring["viz_image"])
+                cv2.waitKey(1)
 
-                #print("added new ring in depth: ", position, ring["color"])
+                #ring_only = cv2.bitwise_and(ring["image"], ring["image"], mask=ring["mask"])
+                #cv2.imshow("Ring color", ring_only)
+                #cv2.waitKey(1)
 
-            else:
-                print(f"⛔ No valid depth values for ring at ({cx_ring}, {cy_ring}) | Color: R={r} G={g} B={b}")
 
         # Optional: clear ring detections
         self.rings = []
 
+        ##DEBUG WINDOW
+        # Do the necessairy conversion so we can visuzalize it in OpenCV
+        image_1 = depth_image / 65536.0 * 255
+        image_1 = image_1/np.max(image_1)*255
 
+        image_viz = np.array(image_1, dtype= np.uint8)
 
+    def classify_color(self, rgb):
+        r = rgb[0]
+        g = rgb[1]
+        b = rgb[2]
 
-
-
-
-    def scale_color(color_16bit):
-        return tuple(int(c / 256) for c in color_16bit)  # 65536 / 256 = 256
-
-
-    def pointcloud_callback(self, data):
-        return
-        height = data.height
-        width = data.width
-        a = pc2.read_points_numpy(data, field_names=("x", "y", "z"))
-        a = a.reshape((height, width, 3))
-
-        # Assume camera (or sensor) position in the /base_link frame.
-        # You might need to adjust this if your camera is offset.
-        camera_position = np.array([0.0, 0.0, 0.0])
+        # Define thresholds for classification
+        if r < 50 and g < 50 and b < 50:
+            return "BLACK"
+        elif r > 200 and g > 200 and b > 200:
+            return "WHITE"
         
-        for ring in self.rings:
-            x, y = ring["pos"]
-            window_size = 5  # Adjust window size if necessary
-            points = []
-            for j in range(max(0, y - window_size//2), min(height, y + window_size//2 + 1)):
-                for i in range(max(0, x - window_size//2), min(width, x + window_size//2 + 1)):
-                    pt = a[j, i, :]
-                    if not np.isnan(pt[2]) and pt[2] != 0:
-                        points.append(pt)
-            points = np.array(points)
-            
-            if points.shape[0] >= 3:
-                centroid = np.mean(points, axis=0)
-                pts_centered = points - centroid
-                if((str(pts_centered[0][0]) == "nan") or (str(pts_centered[0][0]) == "-inf") or (str(pts_centered[0][0]) == "inf")):
-                    print("weird infinite val")
-                    print(points, "\n", centroid, "\n", pts_centered)
-                    continue
-                U, S, Vt = np.linalg.svd(pts_centered)
-                normal = Vt[-1, :]
-                normal = normal / np.linalg.norm(normal)
+        # Check if the green channel is the dominant channel
+        elif g > r and g > b:
+            # If the green is dominant but the values are not too low (light green)
+            if g > 150:
+                return "GREEN"
+            else:
+                return "YELLOW"  # Light Green shades might get misclassified here, adjust thresholds as needed
 
-                vec_to_camera = camera_position - centroid
-                if np.dot(normal, vec_to_camera) < 0:
-                    normal = -normal
-
-                
-                offset_distance = 0.4  
-                new_position = centroid + offset_distance * normal
-
-                #self.get_logger().info(
-                #    f"Ring normal: {normal}, Centroid: {centroid}, Offset position: {new_position}, Color: {ring[1]}, List: {self.rings_global}"
-                #)
-
-                
-                marker = Marker()
-                marker.header.frame_id = "/base_link"
-                marker.header.stamp = data.header.stamp
-                marker.type = 2 
-                marker.id = 0
-
-                scale = 0.1
-                marker.scale.x = scale
-                marker.scale.y = scale
-                marker.scale.z = scale
-
-                r, g, b = ring["color"]
-                marker.color.r = float(r)
-                marker.color.g = float(g)
-                marker.color.b = float(b)
-                marker.color.a = 1.0
-
-                marker.pose.position.x = float(new_position[0])
-                marker.pose.position.y = float(new_position[1])
-                marker.pose.position.z = float(new_position[2])
-                new_ring = {
-                    "pos": new_position,
-                    "color": (float(r), float(g), float(b))
-                }
-                #self.add_global_ring(new_ring)
-                self.rings_global.append(new_ring)
-                self.marker_pub.publish(marker)
-                self.rings = []
-                self.rings_global = []
-
-    def add_global_ring(self, new_ring):
-        # Define a distance threshold for what counts as "too close"
-        distance_threshold = 0.3
+        # Check for Yellow: High red + high green, low blue
+        elif r > 150 and g > 150 and b < 100:
+            return "YELLOW"
         
-        # Check if the new ring is too close to any existing ring
-        for ring in self.rings_global:
-            existing_ring = ring["pos"]
-            distance = self.calculate_3d_distance(new_ring["pos"], existing_ring)
-            if distance < distance_threshold:
-                #print("Ring is too close to an existing ring, skipping addition.")
-                return  # Skip adding this ring
-        
-        self.rings_global.append(new_ring)
-        print(f"Added new global ring at {new_ring['pos'], new_ring['color']}, List: {self.rings_global}")
+        # Check for Orange: High red, medium green, low blue
+        elif r > 150 and g > 100 and b < 100:
+            return "ORANGE"
 
-    def calculate_3d_distance(self, ring1, ring2):
-        # Calculate Euclidean distance between two rings (given as [x, y, z] coordinates)
-        x1, y1, z1 = ring1
-        x2, y2, z2 = ring2
+        # Check for Red: High red, low green and blue
+        elif r > g and r > b:
+            return "RED"
         
-        return math.sqrt((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)
+        # Check for Blue: High blue, low red and green
+        elif b > r and b > g:
+            return "BLUE"
+
+        else:
+            return "Unknown"  # For unexpected cases
+
+
 
 def main():
 	print('Ring detection node starting.')

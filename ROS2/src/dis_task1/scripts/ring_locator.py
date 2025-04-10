@@ -70,19 +70,17 @@ class RingLocator(Node):
         #print("checking new ring")
 
         ring_rel_pos = RingLocator.rotate_vector(data.pose.position, self.yaw)
+        color_word = self.classify_color(data.color.r, data.color.g, data.color.b)
 
         ring_abs_pos = Point(x=ring_rel_pos.x + self.position.x, y=ring_rel_pos.y + self.position.y, z=ring_rel_pos.z + self.position.z)
         ring = {
             "pos": ring_abs_pos,
-            "color": (data.color.r, data.color.g, data.color.b)
+            "color": (data.color.r, data.color.g, data.color.b),
+            "color_word": color_word
         }
         if not self.check_detected(ring):
-            ring = {
-                "pos": ring_abs_pos,
-                "color": (data.color.r, data.color.g, data.color.b)
-            }
             self.rings.append(ring)
-            self.get_logger().info(f"Ring info: Position: {ring['pos']}, Color: {ring['color']}, Number of rings: {len(self.rings)}")
+            self.get_logger().info(f"Ring info: Position: {ring['pos']}, RGB: {ring['color']}, Likely color: {ring['color_word']}, Number of rings: {len(self.rings)}")
             #with open("../ring_locations.txt", "w") as self.rings_file:
             #    for ring in self.rings:
             #        self.rings_file.write(f"{ring.x} {ring.y} {ring.z}\n")
@@ -148,17 +146,18 @@ class RingLocator(Node):
             if dist < self.delta:
                 # Check color difference
                 color_diff = np.linalg.norm(np.array(ring["color"]) - np.array(new_color))
-                if color_diff < self.color_delta:
-                    #print("NOT TOO DIFFERENT IN COLOR. NOT ADDING:", new_color, "old:", color)
-                    # Same ring, update position with average
+                if(f == point["pos"]): # if the pos is the exact same
+                    return True
+                
+                if color_diff < self.color_delta or ring["color_word"] == point["color_word"]:
                     self.rings[i]["pos"].x = (f.x + point["pos"].x) / 2.0
                     self.rings[i]["pos"].y = (f.y + point["pos"].y) / 2.0
                     self.rings[i]["pos"].z = (f.z + point["pos"].z) / 2.0
-                    print(f"Difference is '{dist}' with delta '{self.delta}' \nnew ring: {point}\nold ring: {ring}")
+                    #print(f"Difference is '{dist}' with delta '{self.delta}' \nnew ring: {point}\nold ring: {ring}")
                     return True
                 else:
                     # Too different in color — treat as new ring
-                    #print("TOO DIFFERENT IN COLOR. ADDING...")
+                    #print("TOO DIFFERENT IN COLOR. ADDING...", dist)
                     continue
         return False
 
@@ -166,6 +165,40 @@ class RingLocator(Node):
     # euclidean distance
     def distance(self,p1,p2):
         return math.sqrt((p1.x - p2.x)**2 + (p1.y- p2.y)**2 + (p1.z - p2.z)**2)
+    
+    def classify_color(self, r, g, b):
+        # Define thresholds for classification
+        if r < 50 and g < 50 and b < 50:
+            return "BLACK"
+        elif r > 200 and g > 200 and b > 200:
+            return "WHITE"
+        
+        # Check if the green channel is the dominant channel
+        elif g > r and g > b:
+            # If the green is dominant but the values are not too low (light green)
+            if g > 150:
+                return "GREEN"
+            else:
+                return "YELLOW"  # Light Green shades might get misclassified here, adjust thresholds as needed
+
+        # Check for Yellow: High red + high green, low blue
+        elif r > 150 and g > 150 and b < 100:
+            return "YELLOW"
+        
+        # Check for Orange: High red, medium green, low blue
+        elif r > 150 and g > 100 and b < 100:
+            return "ORANGE"
+
+        # Check for Red: High red, low green and blue
+        elif r > g and r > b:
+            return "RED"
+        
+        # Check for Blue: High blue, low red and green
+        elif b > r and b > g:
+            return "BLUE"
+
+        else:
+            return "Unknown"  # For unexpected cases
 
 
     def quaternion_to_yaw(q):
