@@ -15,6 +15,8 @@ import numpy as np
 
 from ultralytics import YOLO
 
+import time
+
 # from rclpy.parameter import Parameter
 # from rcl_interfaces.msg import SetParametersResult
 
@@ -139,7 +141,12 @@ class detect_faces(Node):
 				centroid = np.mean(points, axis=0)
 				pts_centered = points - centroid
 
-				U, S, Vt = np.linalg.svd(pts_centered)
+				try:
+					U, S, Vt = np.linalg.svd(pts_centered)
+				except np.linalg.LinAlgError as e:
+					self.get_logger().warn(f"SVD did not converge: {e}. Skipping this face.")
+					continue  # Skip this face detection if SVD fails
+
 				normal = Vt[-1, :]
 				normal = normal / np.linalg.norm(normal)
 
@@ -150,6 +157,15 @@ class detect_faces(Node):
 				
 				offset_distance = 0.4  
 				new_position = centroid + offset_distance * normal
+
+				    
+				vec_face = centroid - new_position
+				
+				yaw = np.arctan2(vec_face[1], vec_face[0])
+				
+				qz = np.sin(yaw / 2.0)
+				qw = np.cos(yaw / 2.0)
+
 
 				self.get_logger().info(
 					f"Face normal: {normal}, Centroid: {centroid}, Offset position: {new_position}"
@@ -172,11 +188,15 @@ class detect_faces(Node):
 				marker.color.b = 1.0
 				marker.color.a = 1.0
 
+				marker.pose.orientation.x = 0.0
+				marker.pose.orientation.y = 0.0
+				marker.pose.orientation.z = qz
+				marker.pose.orientation.w = qw
+
 				marker.pose.position.x = float(new_position[0])
 				marker.pose.position.y = float(new_position[1])
 				marker.pose.position.z = float(new_position[2])
 				self.marker_pub.publish(marker)
-
 
 
 def main():

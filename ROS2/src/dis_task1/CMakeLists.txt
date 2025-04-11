@@ -16,7 +16,15 @@ find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 
 find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
+
+find_package(rosidl_default_generators REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/MoverMessage.msg"
+  DEPENDENCIES geometry_msgs # Add packages that the listed interfaces depend on
+)
 
 install(DIRECTORY
   launch
@@ -33,6 +41,9 @@ install(PROGRAMS
   scripts/sweeper.py
   scripts/detect_rings.py
   scripts/ring_locator.py
+  scripts/mover.py
   DESTINATION lib/${PROJECT_NAME})
+
+ament_export_dependencies(${dependencies} rosidl_default_runtime)
 
 ament_package()

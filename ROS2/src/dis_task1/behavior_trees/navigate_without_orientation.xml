@@ -1,0 +1,14 @@
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <Fallback name="root_fallback">
+      <PipelineSequence name="navigate_recovery_sequence">
+        <ComputePathToPose name="ComputePathToPose" />
+        <FollowPath name="FollowPath" />
+      </PipelineSequence>
+      <RecoveryNode name="recovery_node">
+        <ClearCostmapRecovery name="clear_costmap" />
+        <Wait name="wait" duration="5" />
+      </RecoveryNode>
+    </Fallback>
+  </BehaviorTree>
+</root>

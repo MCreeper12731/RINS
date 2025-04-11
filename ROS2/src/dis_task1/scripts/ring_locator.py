@@ -13,6 +13,8 @@ from std_msgs.msg import Bool
 import numpy as np
 from robot_commander import RobotCommander
 
+from dis_task1.msg import MoverMessage
+
 import time
 from cv_bridge import CvBridge
 
@@ -31,6 +33,8 @@ class RingLocator(Node):
         self.create_subscription(Bool, "/ring_locator/start", self.start_tour_callback, QoSReliabilityPolicy.BEST_EFFORT)
         self.marker_publisher = self.create_publisher(Marker, "/debug_marker", QoSReliabilityPolicy.BEST_EFFORT)
     
+        self.goal_publisher = self.create_publisher(MoverMessage, "/mover_command", QoSReliabilityPolicy.BEST_EFFORT)
+
         self.create_timer(0.5, self.timer_callback)
 
         self.bridge = CvBridge()
@@ -76,7 +80,7 @@ class RingLocator(Node):
         ring = {
             "pos": ring_abs_pos,
             "color": (data.color.r, data.color.g, data.color.b),
-            "color_word": color_word
+            "color_word": color_word.lower()
         }
         if not self.check_detected(ring):
             self.rings.append(ring)
@@ -85,12 +89,32 @@ class RingLocator(Node):
             #    for ring in self.rings:
             #        self.rings_file.write(f"{ring.x} {ring.y} {ring.z}\n")
             #self.goto_ring(ring_abs_pos)
+            self.goto_ring(ring)
             
     
 
         if len(self.rings) > 10:
             self.rings.pop(0)
     
+    def goto_ring(self, ring):
+        
+        ms = MoverMessage()
+
+        goal_pose = PoseStamped()
+        goal_pose.header.frame_id = 'map'
+        goal_pose.header.stamp = self.get_clock().now().to_msg()
+
+        goal_pose.pose.position.x = ring["pos"].x
+        goal_pose.pose.position.y = ring["pos"].y
+        goal_pose.pose.position.z = ring["pos"].z
+        goal_pose.pose.orientation = Quaternion(x=0., y=0., z=0., w=1.)
+
+        ms.location = goal_pose
+        ms.type = "ring"
+        ms.data = ring["color_word"]
+
+        self.goal_publisher.publish(ms)
+
     def position_callback(self, data : PoseWithCovarianceStamped):
         self.position = data.pose.pose.position
         self.yaw = RingLocator.quaternion_to_yaw(data.pose.pose.orientation)

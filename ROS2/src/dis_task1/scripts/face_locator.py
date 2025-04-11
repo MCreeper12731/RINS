@@ -13,6 +13,12 @@ from std_msgs.msg import Bool
 import numpy as np
 from robot_commander import RobotCommander
 
+from dis_task1.msg import MoverMessage
+
+import tf2_ros
+from tf2_geometry_msgs import do_transform_pose
+from geometry_msgs.msg import PoseStamped
+
 import time
 
 class FaceLocator(Node):
@@ -27,6 +33,11 @@ class FaceLocator(Node):
         self.create_subscription(PoseWithCovarianceStamped, "/amcl_pose", self.position_callback, QoSReliabilityPolicy.BEST_EFFORT)
         self.create_subscription(Bool, "/face_locator/start", self.start_tour_callback, QoSReliabilityPolicy.BEST_EFFORT)
         self.marker_publisher = self.create_publisher(Marker, "/debug_marker", QoSReliabilityPolicy.BEST_EFFORT)
+
+        self.goal_publisher = self.create_publisher(MoverMessage, "/mover_command", QoSReliabilityPolicy.BEST_EFFORT)
+
+        self.tf_buffer = tf2_ros.Buffer()
+        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
     
         self.create_timer(0.5, self.timer_callback)
 
@@ -57,27 +68,76 @@ class FaceLocator(Node):
                     self.get_logger().info("Waiting for the task to complete...")
                     time.sleep(1)
     
-    def face_found_callback(self, data : Marker):
-        if (self.position is None):
+    def face_found_callback(self, data: Marker):
+    # If we don't have a valid robot pose already, skip:
+        if self.position is None:
             self.get_logger().info("Position is None")
             return
 
-        face_rel_pos = FaceLocator.rotate_vector(data.pose.position, self.yaw)
+        # Create a PoseStamped for the marker (which is in base_link)
+        pose_stamped = PoseStamped()
+        pose_stamped.header = data.header
+        pose_stamped.pose = data.pose
 
-        face_abs_pos = Point(x=face_rel_pos.x + self.position.x, y=face_rel_pos.y + self.position.y, z=face_rel_pos.z + self.position.z)
+        # Try to transform the marker pose from base_link to map using the marker’s stamp
+        try:
+            transform = self.tf_buffer.lookup_transform(
+                "map",        
+                data.header.frame_id[1::],  
+                data.header.stamp,    
+                rclpy.duration.Duration(seconds=1.0)
+            )
+            # Transform the pose into map frame
+            pose_in_map = do_transform_pose(pose_stamped.pose, transform)
+        except Exception as e:
+            self.get_logger().error("TF transform error: " + str(e))
+            return
 
+        # Now, pose_in_map contains the face location in the map frame
+        face_abs_pos = pose_in_map.position
+        transformed_orientation = pose_in_map.orientation
+
+        # Optionally, you can log the transformed pose:
+        self.get_logger().info(
+            f"Transformed face position: ({face_abs_pos.x:.2f}, {face_abs_pos.y:.2f}, {face_abs_pos.z:.2f})"
+        )
+
+        # Check for duplicates and call goto_face if this is a new detection:
         if not self.check_detected(face_abs_pos):
             self.faces.append(face_abs_pos)
-            self.get_logger().info(str(len(self.faces)))
-            #with open("../face_locations.txt", "w") as self.faces_file:
-            #    for face in self.faces:
-            #        self.faces_file.write(f"{face.x} {face.y} {face.z}\n")
-            self.goto_face(face_abs_pos)
-            
-    
+            self.goto_face(face_abs_pos, orientation=transformed_orientation)
+
 
         if len(self.faces) > 10:
             self.faces.pop(0)
+
+                
+
+    def goto_face(self, face_point: Point, orientation: Quaternion):
+        
+        ms = MoverMessage()
+
+        goal_pose = PoseStamped()
+        goal_pose.header.frame_id = 'map'
+        goal_pose.header.stamp = self.get_clock().now().to_msg()
+
+        goal_pose.pose.position.x = face_point.x
+        goal_pose.pose.position.y = face_point.y
+        goal_pose.pose.position.z = face_point.z
+        goal_pose.pose.orientation = orientation
+
+        ms.location = goal_pose
+        ms.type = "face"
+        ms.data = ""
+
+        self.goal_publisher.publish(ms)
+
+        self.get_logger().info(
+            f"Sending goal: pos=({face_point.x}, {face_point.y}, {face_point.z}), "
+            f"orientation=({orientation.x}, {orientation.y}, {orientation.z}, {orientation.w})"
+        )
+        
+
     
     def position_callback(self, data : PoseWithCovarianceStamped):
         self.position = data.pose.pose.position
@@ -138,6 +198,13 @@ class FaceLocator(Node):
         siny = 2.0 * (q.w * q.z + q.x * q.y)
         cosy = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
         return math.atan2(siny, cosy)
+    
+    def yaw_to_quaternion(yaw: float) -> Quaternion:
+    # Create a quaternion from a yaw angle (roll and pitch are zero)
+        qz = math.sin(yaw / 2.0)
+        qw = math.cos(yaw / 2.0)
+        return Quaternion(x=0.0, y=0.0, z=qz, w=qw)
+
 
     def rotate_vector(vector, theta) -> Point:
         R = np.array([
