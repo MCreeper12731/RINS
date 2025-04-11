@@ -108,7 +108,7 @@ class detect_faces(Node):
 
 				#self.marker_pub.publish(marker)
 
-			cv2.imshow("image", cv_image)
+			cv2.imshow("Face Recognition", cv_image)
 			key = cv2.waitKey(1)
 			if key==27:
 				print("exiting")

@@ -32,10 +32,11 @@ class MoveCommand:
 
     def completed(self, node):
         if (self.data is None or len(self.data) == 0):
+            node.publish_marker(self.coordinates(), self,  0.1, 1, [0.5, 0.5, 0.5])
             return
         
         node.get_logger().info(f"Reached goal with data: {self.data}")
-        node.publish_marker(self.coordinates(), self, [0.5, 0.5, 0.5])
+        node.publish_marker(self.coordinates(), self,  0.3, 3, [0.5, 0.5, 0.5])
         playsound(f"src/dis_task1/audio/{self.data}")
 
     def coordinates(self):
@@ -45,6 +46,8 @@ class MoveCommand:
         return self.priority < other.priority
 
 class Mover(Node):
+
+    detected_colors = []
 
     def __init__(self):
         super().__init__("mover")
@@ -70,8 +73,6 @@ class Mover(Node):
         
     def new_command(self):
         self.current_command : MoveCommand = self.command_queue.get()
-        if (self.current_command.data is None):
-            self.robot_commander.goToPose(self.current_command.location, behavior_tree="src/dis_task1/behavior_trees/navigate_without_orientation.xml")
         self.robot_commander.goToPose(self.current_command.location)
 
     def parse_move_message(self, message : MoverMessage):
@@ -79,13 +80,18 @@ class Mover(Node):
         
         if (message.type == "sweep"):
             move_command = MoveCommand(message.location, "sweep", None)
-            self.publish_marker(move_command.coordinates(), move_command, [0., 1., 0.])
+            self.publish_marker(move_command.coordinates(), move_command, 0.1, 1, [0., 1., 0.])
         elif (message.type == "ring"):
-            move_command = MoveCommand(message.location, "ring", f"{message.data}.mp3")
-            self.publish_marker(move_command.coordinates(), move_command, [1., 0., 0.])
+            if (message.data in Mover.detected_colors):
+                return
+            Mover.detected_colors.append(message.data)
+            playsound(f"src/dis_task1/audio/{message.data}.mp3")
+            return
+            #move_command = MoveCommand(message.location, "ring", f"{message.data}.mp3")
+            #self.publish_marker(move_command.coordinates(), move_command, 0.4, [1., 0., 0.])
         elif (message.type == "face"):
-            move_command = MoveCommand(message.location, "type", "hello_human.mp3")
-            self.publish_marker(move_command.coordinates(), move_command, [0., 0., 1.])
+            move_command = MoveCommand(message.location, "face", "hello_human.mp3")
+            self.publish_marker(move_command.coordinates(), move_command, 0.3, 3, [0., 0., 1.])
         else:
             raise ValueError("Invalid move type")
 
@@ -108,18 +114,17 @@ class Mover(Node):
         
         self.new_command()
 
-    def publish_marker(self, location : list[float], move_command : MoveCommand, color : list[float] = [0.5, 0.5, 0.5]):
+    def publish_marker(self, location : list[float], move_command : MoveCommand, size : int, shape : int, color : list[float] = [0.5, 0.5, 0.5]):
         marker = Marker()
 
         marker.header.frame_id = "map"
 
-        marker.type = 1
+        marker.type = shape
         marker.id = move_command.priority
 
-        scale = 0.3
-        marker.scale.x = scale
-        marker.scale.y = scale
-        marker.scale.z = scale
+        marker.scale.x = float(size)
+        marker.scale.y = float(size)
+        marker.scale.z = float(size)
 
         marker.color.r = color[0]
         marker.color.g = color[1]

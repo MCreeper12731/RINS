@@ -497,11 +497,11 @@ class detect_rings(Node):
                 r, g, b = ring["color"]  # RGB values for the ring
 
                 marker = Marker()
-                marker.header.frame_id = "camera_link"
+                marker.header.frame_id = "map"
                 marker.header.stamp = data.header.stamp
                 marker.type = Marker.SPHERE
                 marker.id = 0
-                marker.scale.x = marker.scale.y = marker.scale.z = 0.1
+                marker.scale.x = marker.scale.y = marker.scale.z = 0.3
 
                 marker.color.r = float(r)
                 marker.color.g = float(g)

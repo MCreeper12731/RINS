@@ -5,6 +5,9 @@ import cv2
 from matplotlib import pyplot as plt
 from shapely.geometry import Polygon, box, LineString
 from scipy.spatial import Voronoi
+from turtle_tf2_py.turtle_tf2_broadcaster import quaternion_from_euler
+import random
+import math
 
 import rclpy
 from rclpy.node import Node
@@ -38,13 +41,19 @@ class TraversalNode:
         x, y = self.to_world(resolution, origin)
         goal_pose.pose.position.x = x
         goal_pose.pose.position.y = y
-        goal_pose.pose.orientation = Quaternion(x=0., y=0., z=0., w=1.)
+        goal_pose.pose.orientation = self.random_quat()
 
         mover_message.location = goal_pose
         mover_message.type = "sweep"
         mover_message.data = ""
 
         return mover_message
+
+    def random_quat(self):
+        quat_tf = quaternion_from_euler(0, 0, random.uniform(0, 2 * math.pi))
+
+        # Convert a list to geometry_msgs.msg.Quaternion
+        return Quaternion(x=quat_tf[0], y=quat_tf[1], z=quat_tf[2], w=quat_tf[3])
 
 
 class Sweeper(Node):
@@ -295,7 +304,7 @@ class Sweeper(Node):
 
         return list(node_map.values())
 
-    def prune_close_nodes(self, nodes, min_distance=12):
+    def prune_close_nodes(self, nodes, min_distance=10):
         pruned_nodes = []
         removed = set()
 
