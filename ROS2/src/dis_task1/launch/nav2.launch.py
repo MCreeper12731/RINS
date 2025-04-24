@@ -42,7 +42,7 @@ ARGUMENTS = [
                               ]),
                           description='Nav2 parameters'),
     DeclareLaunchArgument('namespace', default_value='',
-                          description='Robot namespace')
+                          description='Robot namespace'),
     DeclareLaunchArgument('map', default_value=PathJoinSubstitution(
                           [pkg_dis_task2, 'maps', 'map.yaml']),
                           description='Full path to map yaml file to load'),
