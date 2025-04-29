@@ -37,7 +37,8 @@ class MoveCommand:
         
         node.get_logger().info(f"Reached goal with data: {self.data}")
         node.publish_marker(self.coordinates(), self,  0.3, 3, [0.5, 0.5, 0.5])
-        playsound(f"src/dis_task1/audio/{self.data}")
+        print("Approached face!")
+        # playsound(f"src/dis_task2/audio/{self.data}")
 
     def coordinates(self):
         return [self.location.pose.position.x, self.location.pose.position.y, self.location.pose.position.z]
@@ -63,7 +64,7 @@ class Mover(Node):
         time.sleep(10)
 
         sweeper = Sweeper()
-        messages : list[MoverMessage] = sweeper.pipeline(visualize=True)
+        messages : list[MoverMessage] = sweeper.pipeline(visualize=False)
         sweeper.destroy_node()
         for i, message in enumerate(messages):
             if (i % 2 == 0):
@@ -85,7 +86,8 @@ class Mover(Node):
             if (message.data in Mover.detected_colors):
                 return
             Mover.detected_colors.append(message.data)
-            playsound(f"src/dis_task1/audio/{message.data}.mp3")
+            # playsound(f"src/dis_task2/audio/{message.data}.mp3")
+            print("Approached ring!")
             return
             #move_command = MoveCommand(message.location, "ring", f"{message.data}.mp3")
             #self.publish_marker(move_command.coordinates(), move_command, 0.4, [1., 0., 0.])

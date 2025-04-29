@@ -26,12 +26,9 @@ class FaceLocator(Node):
         super().__init__("face_locator")
 
         self.delta = 1.
-        self.position = None
         self.yaw = 0.0
         self.faces : list[Point] = []
         self.create_subscription(Marker, "/people_marker", self.face_found_callback, QoSReliabilityPolicy.BEST_EFFORT)
-        self.create_subscription(PoseWithCovarianceStamped, "/amcl_pose", self.position_callback, QoSReliabilityPolicy.BEST_EFFORT)
-        self.create_subscription(Bool, "/face_locator/start", self.start_tour_callback, QoSReliabilityPolicy.BEST_EFFORT)
         self.marker_publisher = self.create_publisher(Marker, "/debug_marker", QoSReliabilityPolicy.BEST_EFFORT)
 
         self.goal_publisher = self.create_publisher(MoverMessage, "/mover_command", QoSReliabilityPolicy.BEST_EFFORT)
@@ -40,73 +37,21 @@ class FaceLocator(Node):
         self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
     
         self.create_timer(0.5, self.timer_callback)
-
-    def start_tour_callback(self, data : Bool):
-        self.get_logger().info("YAY")
-        faces : list[Point] = []
-        file = open("../face_locations.txt", "r")
-        for line in file.readlines():
-            x, y, z = line.split()
-            faces.append(Point(x=float(x), y=float(y), z=float(z)))
-        # file.close()
-        while True:
-            for face in faces:
-                
-                rc = RobotCommander()
-
-                goal_pose = PoseStamped()
-                goal_pose.header.frame_id = 'map'
-                goal_pose.header.stamp = rc.get_clock().now().to_msg()
-
-                goal_pose.pose.position.x = face.x
-                goal_pose.pose.position.y = face.y
-                goal_pose.pose.orientation = rc.YawToQuaternion(0.57)
-
-                rc.goToPose(goal_pose)
-
-                while not rc.isTaskComplete():
-                    self.get_logger().info("Waiting for the task to complete...")
-                    time.sleep(1)
     
     def face_found_callback(self, data: Marker):
-        print("face found callback")
-    # If we don't have a valid robot pose already, skip:
-        if self.position is None:
-            self.get_logger().info("Position is None")
-            return
 
         # Create a PoseStamped for the marker (which is in base_link)
         pose_stamped = PoseStamped()
         pose_stamped.header = data.header
         pose_stamped.pose = data.pose
-
-        # Try to transform the marker pose from base_link to map using the marker’s stamp
-        try:
-            transform = self.tf_buffer.lookup_transform(
-                "map",        
-                data.header.frame_id[1::],  
-                data.header.stamp,    
-                rclpy.duration.Duration(seconds=1.0)
-            )
-            # Transform the pose into map frame
-            pose_in_map = do_transform_pose(pose_stamped.pose, transform)
-        except Exception as e:
-            self.get_logger().error("TF transform error: " + str(e))
-            return
-
-        # Now, pose_in_map contains the face location in the map frame
-        face_abs_pos = pose_in_map.position
-        transformed_orientation = pose_in_map.orientation
-
-        # Optionally, you can log the transformed pose:
-        self.get_logger().info(
-            f"Transformed face position: ({face_abs_pos.x:.2f}, {face_abs_pos.y:.2f}, {face_abs_pos.z:.2f})"
-        )
+        
+        face_abs_pos = data.pose.position
+        orientation = data.pose.orientation
 
         # Check for duplicates and call goto_face if this is a new detection:
         if not self.check_detected(face_abs_pos):
             self.faces.append(face_abs_pos)
-            self.goto_face(face_abs_pos, orientation=transformed_orientation)
+            self.goto_face(face_abs_pos, orientation=orientation)
 
 
         if len(self.faces) > 10:
