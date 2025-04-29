@@ -69,6 +69,7 @@ class FaceLocator(Node):
                     time.sleep(1)
     
     def face_found_callback(self, data: Marker):
+        print("face found callback")
     # If we don't have a valid robot pose already, skip:
         if self.position is None:
             self.get_logger().info("Position is None")

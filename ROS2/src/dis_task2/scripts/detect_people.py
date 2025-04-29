@@ -4,209 +4,198 @@ import rclpy
 from rclpy.node import Node
 from rclpy.qos import qos_profile_sensor_data, QoSReliabilityPolicy
 
-from sensor_msgs.msg import Image, PointCloud2
-from sensor_msgs_py import point_cloud2 as pc2
-
+from sensor_msgs.msg import Image, CameraInfo
 from visualization_msgs.msg import Marker
+from geometry_msgs.msg import PoseStamped
+from builtin_interfaces.msg import Duration
 
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import numpy as np
 
 from ultralytics import YOLO
+import tf2_ros
+import tf2_geometry_msgs
 
-import time
-
-# from rclpy.parameter import Parameter
-# from rcl_interfaces.msg import SetParametersResult
-
-class detect_faces(Node):
-
+class FaceDetector(Node):
 	def __init__(self):
 		super().__init__('detect_faces')
 
-		self.declare_parameters(
-			namespace='',
-			parameters=[
-				('device', ''),
-		])
-
-		marker_topic = "/people_marker"
-
-		self.detection_color = (0,0,255)
+		self.declare_parameter('device', '')
 		self.device = self.get_parameter('device').get_parameter_value().string_value
 
 		self.bridge = CvBridge()
-		self.scan = None
-		self.rgb_image_sub = self.create_subscription(Image, "/oak/rgb/image_raw", self.rgb_callback, qos_profile_sensor_data)
-		self.pointcloud_sub = self.create_subscription(PointCloud2, "/oakd/rgb/preview/depth/points", self.pointcloud_callback, qos_profile_sensor_data)
 
-		self.marker_pub = self.create_publisher(Marker, marker_topic, QoSReliabilityPolicy.BEST_EFFORT)
+		self.depth_image = None
+		self.camera_info = None
 
-		self.model = YOLO("yolov8n.pt")
+		self.tf_buffer = tf2_ros.Buffer()
+		self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
 
-		self.faces = []
+		self.create_subscription(
+			Image,
+			'/oak/rgb/image_raw',
+			self.rgb_callback,
+			qos_profile_sensor_data
+		)
+		self.create_subscription(
+			Image,
+			'/oak/stereo/image_raw',
+			self.depth_callback,
+			qos_profile_sensor_data
+		)
+		self.camera_info_subscriber = self.create_subscription(
+			CameraInfo,
+			'/oak/rgb/camera_info',
+			self.camera_info_callback,
+			qos_profile_sensor_data
+		)
 
-		self.get_logger().info(f"Node has been initialized! Will publish face markers to {marker_topic}.")
+		self.marker_pub = self.create_publisher(
+			Marker,
+			'/people_marker',
+			QoSReliabilityPolicy.BEST_EFFORT
+		)
 
-	def rgb_callback(self, data):
+		self.model = YOLO('yolov8n.pt')
+		self.get_logger().info('FaceDetector node initialized')
 
-		self.faces = []
+		cv2.namedWindow("Depth Image", cv2.WINDOW_NORMAL)
+
+	def camera_info_callback(self, msg: CameraInfo):
+		if self.camera_info is None:
+			self.camera_info = msg
+			self.get_logger.info("ℹ️ Received camera intrinsics, unsubscribing from topic!")
+			self.destroy_subscription(self.camera_info_subscriber)
+
+	def depth_callback(self, msg: Image):
+		try:
+			if msg.encoding == '16UC1':
+				depth_raw = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+				self.depth_image = depth_raw.astype(np.float32) / 1000.0
+			else:
+				self.depth_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='32FC1')
+		except CvBridgeError as e:
+			self.get_logger().error(f'Depth convert error: {e}')
+		cv2.imshow("Depth Image", cv2.cvtColor(depth_raw, cv2.COLOR_GRAY2BGR))
+		self.get_logger().info(self.depth_image)
+
+	def rgb_callback(self, msg: Image):
+		if self.depth_image is None or self.camera_info is None:
+			return
 
 		try:
-			cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
-
-
-			# run inference
-			res = self.model.predict(cv_image, imgsz=(256, 320), show=False, verbose=False, classes=[0], device=self.device)
-
-			# iterate over results
-			for x in res:
-				bbox = x.boxes.xyxy
-				if bbox.nelement() == 0: # skip if empty
-					continue
-
-
-				bbox = bbox[0]
-
-				# draw rectangle
-				cv_image = cv2.rectangle(cv_image, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), self.detection_color, 3)
-
-				cx = int((bbox[0]+bbox[2])/2)
-				cy = int((bbox[1]+bbox[3])/2)
-
-				# draw the center of bounding box
-				cv_image = cv2.circle(cv_image, (cx,cy), 5, self.detection_color, -1)
-
-				self.faces.append((cx,cy))
-				print("list:", self.faces)
-
-				marker = Marker()
-
-				marker.header.frame_id = "/base_link"
-				marker.header.stamp = data.header.stamp
-
-				marker.type = 2
-				marker.id = 0
-
-				# Set the scale of the marker
-				scale = 0.1
-				marker.scale.x = scale
-				marker.scale.y = scale
-				marker.scale.z = scale
-
-				# Set the color
-				marker.color.r = 1.0
-				marker.color.g = 1.0
-				marker.color.b = 1.0
-				marker.color.a = 1.0
-
-				# Set the pose of the marker
-				marker.pose.position.x = float((bbox[0]+bbox[2])/2)
-				marker.pose.position.y = float((bbox[1]+bbox[3])/2)
-				marker.pose.position.z = 1.
-
-				#self.marker_pub.publish(marker)
-
-			cv2.imshow("Face Recognition", cv_image)
-			key = cv2.waitKey(1)
-			if key==27:
-				print("exiting")
-				exit()
-			
+			color_img = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
 		except CvBridgeError as e:
-			print(e)
+			self.get_logger().error(f'RGB conversion failed: {e}')
+			return
 
-	def pointcloud_callback(self, data):
-		height = data.height
-		width = data.width
-		a = pc2.read_points_numpy(data, field_names=("x", "y", "z"))
-		a = a.reshape((height, width, 3))
+		# Run face detection (class 0)
+		results = self.model.predict(
+			color_img,
+			imgsz=(256, 320),
+			classes=[0],
+			device=self.device,
+			verbose=False
+		)
 
-		# Assume camera (or sensor) position in the /base_link frame.
-		# You might need to adjust this if your camera is offset.
-		camera_position = np.array([0.0, 0.0, 0.0])
-		
-		for x, y in self.faces:
-			window_size = 5  # Adjust window size if necessary
-			points = []
-			for j in range(max(0, y - window_size//2), min(height, y + window_size//2 + 1)):
-				for i in range(max(0, x - window_size//2), min(width, x + window_size//2 + 1)):
-					pt = a[j, i, :]
-					if not np.isnan(pt[2]) and pt[2] != 0:
-						points.append(pt)
-			points = np.array(points)
-			
-			if points.shape[0] >= 3:
-				centroid = np.mean(points, axis=0)
-				pts_centered = points - centroid
+		# Extract camera intrinsics
+		K = self.camera_info.k
+		fx, fy = K[0], K[4]
+		cx_i, cy_i = K[2], K[5]
+		cam_frame = self.camera_info.header.frame_id
 
-				try:
-					U, S, Vt = np.linalg.svd(pts_centered)
-				except np.linalg.LinAlgError as e:
-					self.get_logger().warn(f"SVD did not converge: {e}. Skipping this face.")
-					continue  # Skip this face detection if SVD fails
+		for det in results:
+			if det.boxes.xyxy.nelement() == 0:
+				continue
 
-				normal = Vt[-1, :]
-				normal = normal / np.linalg.norm(normal)
+			x1, y1, x2, y2 = det.boxes.xyxy[0]
+			u = int((x1 + x2) / 2)
+			v = int((y1 + y2) / 2)
 
-				vec_to_camera = camera_position - centroid
-				if np.dot(normal, vec_to_camera) < 0:
-					normal = -normal
+			# Draw 2D overlay
+			cv2.rectangle(color_img, (int(x1), int(y1)), (int(x2), int(y2)), (0, 0, 255), 2)
+			cv2.circle(color_img, (u, v), 4, (0, 0, 255), -1)
 
-				
-				offset_distance = 0.4  
-				new_position = centroid + offset_distance * normal
+			# Sample a small patch around (u,v)
+			patch = self.depth_image[
+				max(0, v-1): v+2,
+				max(0, u-1): u+2
+			]
+			valid = patch[np.isfinite(patch) & (patch > 0)]
+			if valid.size == 0:
+				self.get_logger().warn(f'No valid depth at pixel ({u},{v})')
+				continue
 
-				    
-				vec_face = centroid - new_position
-				
-				yaw = np.arctan2(vec_face[1], vec_face[0])
-				
-				qz = np.sin(yaw / 2.0)
-				qw = np.cos(yaw / 2.0)
+			# Compute 3D point in camera frame
+			Z = float(np.mean(valid))
+			X = (u - cx_i) * Z / fx
+			Y = (v - cy_i) * Z / fy
 
+			# Build PoseStamped in camera frame
+			cam_pose = PoseStamped()
+			cam_pose.header.frame_id = cam_frame
+			cam_pose.header.stamp = msg.header.stamp
+			cam_pose.pose.position.x = X
+			cam_pose.pose.position.y = Y
+			cam_pose.pose.position.z = Z
+			# orientation pointing back to camera
+			yaw = np.arctan2(Y, X)
+			cam_pose.pose.orientation.z = float(np.sin(yaw/2.0))
+			cam_pose.pose.orientation.w = float(np.cos(yaw/2.0))
 
-				self.get_logger().info(
-					f"Face normal: {normal}, Centroid: {centroid}, Offset position: {new_position}"
-				)
+			# Transform into base_link
+			try:
+				t = self.tf_buffer.lookup_transform('base_link', cam_frame, msg.header.stamp, rclpy.duration.Duration(seconds=1.0))
+				base_pose = tf2_geometry_msgs.do_transform_pose(cam_pose, t)
+			except (tf2_ros.LookupException,
+					tf2_ros.ExtrapolationException,
+					tf2_ros.TransformException) as e:
+				self.get_logger().warn(f'TF transform failed: {e}')
+				continue
 
-				
-				marker = Marker()
-				marker.header.frame_id = "/base_link"
-				marker.header.stamp = data.header.stamp
-				marker.type = 2 
-				marker.id = 0
+			# Create and publish marker in base_link
+			marker = Marker()
 
-				scale = 0.1
-				marker.scale.x = scale
-				marker.scale.y = scale
-				marker.scale.z = scale
+			marker.header.frame_id = "base_link"
+			# marker.header.stamp = rospy.get_rostime()
 
-				marker.color.r = 1.0
-				marker.color.g = 1.0
-				marker.color.b = 1.0
-				marker.color.a = 1.0
+			marker.type = 2
+			marker.id = 0
 
-				marker.pose.orientation.x = 0.0
-				marker.pose.orientation.y = 0.0
-				marker.pose.orientation.z = qz
-				marker.pose.orientation.w = qw
+			# Set the scale of the marker
+			scale = 0.5
+			marker.scale.x = scale
+			marker.scale.y = scale
+			marker.scale.z = scale
 
-				marker.pose.position.x = float(new_position[0])
-				marker.pose.position.y = float(new_position[1])
-				marker.pose.position.z = float(new_position[2])
-				self.marker_pub.publish(marker)
+			# Set the color
+			marker.color.r = 1.0
+			marker.color.g = 0.0
+			marker.color.b = 0.0
+			marker.color.a = 1.0
+			marker.pose = base_pose.pose
+
+			marker.lifetime = rclpy.duration.Duration(seconds=0).to_msg()
+
+			self.marker_publisher.publish(marker)
+
+		# Show detection window
+		cv2.imshow('Face Detection', color_img)
+		if cv2.waitKey(1) == 27:
+			rclpy.shutdown()
 
 
 def main():
-	print('Face detection node starting.')
-
-	rclpy.init(args=None)
-	node = detect_faces()
-	rclpy.spin(node)
-	node.destroy_node()
-	rclpy.shutdown()
+	rclpy.init()
+	node = FaceDetector()
+	try:
+		rclpy.spin(node)
+	except KeyboardInterrupt:
+		pass
+	finally:
+		node.destroy_node()
+		rclpy.shutdown()
 
 if __name__ == '__main__':
 	main()

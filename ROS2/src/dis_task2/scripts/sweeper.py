@@ -3,6 +3,7 @@
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
+from matplotlib.patches import Polygon as MplPolygon
 from shapely.geometry import Polygon, box, LineString
 from scipy.spatial import Voronoi
 from turtle_tf2_py.turtle_tf2_broadcaster import quaternion_from_euler
@@ -15,7 +16,7 @@ from nav_msgs.msg import OccupancyGrid
 from nav_msgs.srv import GetMap
 from geometry_msgs.msg import PoseStamped, Quaternion
 
-from dis_task1.msg import MoverMessage
+from dis_task2.msg import MoverMessage
 
 class TraversalNode:
     def __init__(self, x, y):
@@ -119,10 +120,10 @@ class Sweeper(Node):
 
         return traversal_order
 
-    def extract_wall_points(self, binary_map, resolution, origin, spacing=0.1):
+    def extract_wall_points(self, binary_map, resolution, origin, spacing=0.5):
 
         search_map = np.uint8(binary_map * 255)
-        contours, _ = cv2.findContours(search_map, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(search_map, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
         wall_points = []
         for contour in contours:
@@ -150,7 +151,7 @@ class Sweeper(Node):
         plt.figure(figsize=(20, 20))
         plt.imshow(binary_map, cmap='gray', origin='upper')
 
-        plt.scatter(points[:, 0], points[:, 1], c='red', s=1)
+        plt.scatter(points[:, 0], points[:, 1], c='red', s=20   )
 
         for node in traversal_nodes:
             plt.scatter(node.x, node.y, c='red', s=15)
@@ -160,6 +161,32 @@ class Sweeper(Node):
         plt.title("Navmesh Overlaid on Wall Map")
         plt.xlim(0, binary_map.shape[1])
         plt.ylim(0, binary_map.shape[0])
+        plt.show()
+
+    def plot_binary_map_with_polygons(self, binary_map, polygons):
+        fig, ax = plt.subplots(figsize=(10, 10))
+        
+        # Show the binary map
+        ax.imshow(binary_map, cmap='gray', origin='lower')
+
+        # Make sure polygons is a list
+        if not isinstance(polygons, list):
+            polygons = [polygons]
+
+        # Plot each polygon
+        for poly in polygons:
+            if isinstance(poly, Polygon):
+                patches = [poly]
+            else:
+                continue
+
+            for patch in patches:
+                x, y = patch.exterior.xy
+                ax.add_patch(MplPolygon(np.column_stack((x, y)), fill=False, edgecolor='red', linewidth=2))
+
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        plt.grid(True)
         plt.show()
             
     def generate_traversal_nodes(self, binary_map, wall_points, resolution, origin):
@@ -171,6 +198,9 @@ class Sweeper(Node):
 
         voronoi = Voronoi(points)
         polygons = self.filter_voronoi_cells(voronoi, binary_map.shape)
+
+        # self.plot_binary_map_with_polygons(binary_map, polygons)
+        
         edges = self.polygons_to_edges(polygons)
         edges = self.prune_edges(edges, binary_map)
         nodes : list[TraversalNode] = self.build_traversal_graph(edges)
@@ -178,8 +208,6 @@ class Sweeper(Node):
         self.prune_connections_over_walls(nodes, binary_map)
         nodes = self.remove_outside_node_clusters(nodes, binary_map.shape)
         return nodes
-
-        
 
     def filter_voronoi_cells(self, voronoi, map_shape):
         height, width = map_shape
@@ -211,7 +239,7 @@ class Sweeper(Node):
         y_pixels = [(y - origin[1]) / resolution for y in y_points]
         return np.column_stack((x_pixels, y_pixels))
 
-    def prune_close_points(self, points, min_distance=0.3):
+    def prune_close_points(self, points, min_distance=0.2):
         points = np.array(points)
         pruned = []
 
@@ -247,7 +275,7 @@ class Sweeper(Node):
                     return True
         return False
 
-    def sample_points_on_edge(self, edge, spacing=1.0):
+    def sample_points_on_edge(self, edge, spacing=0.1):
         x1, y1 = edge[0]
         x2, y2 = edge[1]
         
@@ -304,7 +332,7 @@ class Sweeper(Node):
 
         return list(node_map.values())
 
-    def prune_close_nodes(self, nodes, min_distance=10):
+    def prune_close_nodes(self, nodes, min_distance=9):
         pruned_nodes = []
         removed = set()
 

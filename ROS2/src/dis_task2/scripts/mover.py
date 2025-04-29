@@ -10,7 +10,7 @@ from visualization_msgs.msg import Marker
 
 from playsound import playsound
 
-from dis_task1.msg import MoverMessage
+from dis_task2.msg import MoverMessage
 from sweeper import Sweeper
 from robot_commander import RobotCommander
 
@@ -63,7 +63,7 @@ class Mover(Node):
         time.sleep(10)
 
         sweeper = Sweeper()
-        messages : list[MoverMessage] = sweeper.pipeline()
+        messages : list[MoverMessage] = sweeper.pipeline(visualize=True)
         sweeper.destroy_node()
         for i, message in enumerate(messages):
             if (i % 2 == 0):
