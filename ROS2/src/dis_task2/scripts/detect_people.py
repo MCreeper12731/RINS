@@ -55,7 +55,7 @@ class FaceDetector(Node):
 			qos_profile_sensor_data
 		)
 
-		self.marker_pub = self.create_publisher(
+		self.marker_publisher = self.create_publisher(
 			Marker,
 			'/people_marker',
 			QoSReliabilityPolicy.BEST_EFFORT
@@ -139,43 +139,27 @@ class FaceDetector(Node):
 				self.get_logger().warn(f'No valid depth at pixel ({u},{v})')
 				continue
 
-			# Compute 3D point in camera frame
-			Z = float(np.mean(valid))
-			X = (u - cx_i) * Z / fx
-			Y = (v - cy_i) * Z / fy
+			Z = float(np.mean(valid)) # Forward backward
+			X = (u - cx_i) * Z / fx # Left right
+			Y = (v - cy_i) * Z / fy # Up down
 
-			# Build PoseStamped in camera frame
-			cam_pose = PoseStamped()
-			cam_pose.header.frame_id = cam_frame
-			cam_pose.header.stamp = msg.header.stamp
-			cam_pose.pose.position.x = X
-			cam_pose.pose.position.y = Y
-			cam_pose.pose.position.z = Z
-			# orientation pointing back to camera
-			yaw = np.arctan2(Y, X)
-			cam_pose.pose.orientation.z = float(np.sin(yaw/2.0))
-			cam_pose.pose.orientation.w = float(np.cos(yaw/2.0))
+			print(f"Local coordinates: {X:.3f}, {Y:.3f}, {Z:.3f}")
+			
+			# avoid false detections
+			if(Z < 0):
+				print("Detected face is above polygon")
+				continue
 
-
-			# Transform into base_link
-
-			t = self.tf_buffer.lookup_transform('base_link', cam_frame, msg.header.stamp, rclpy.duration.Duration(seconds=1.0))
-			base_pose = tf2_geometry_msgs.do_transform_pose(cam_pose, t)
-
-
-
-			self.get_logger().info("AAAAA")
-			# Create and publish marker in base_link
 			marker = Marker()
 
-			marker.header.frame_id = "base_link"
+			marker.header.frame_id = "oakd_rgb_camera_optical_frame"
 			# marker.header.stamp = rospy.get_rostime()
 
 			marker.type = 2
 			marker.id = 0
 
 			# Set the scale of the marker
-			scale = 3.
+			scale = 0.5
 			marker.scale.x = scale
 			marker.scale.y = scale
 			marker.scale.z = scale
@@ -185,16 +169,23 @@ class FaceDetector(Node):
 			marker.color.g = 0.0
 			marker.color.b = 0.0
 			marker.color.a = 1.0
-			marker.pose = base_pose.pose
+			marker.pose.position.x = X
+			marker.pose.position.y = Y
+			marker.pose.position.z = Z
 
 			marker.lifetime = rclpy.duration.Duration(seconds=0).to_msg()
 
 			self.marker_publisher.publish(marker)
+			# Create and publish marker in base_link
+			
 
 		# Show detection window
 		cv2.imshow('Face Detection', color_img)
 		if cv2.waitKey(1) == 27:
 			rclpy.shutdown()
+
+
+		
 
 
 def main():
