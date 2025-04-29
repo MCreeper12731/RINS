@@ -65,7 +65,9 @@ class FaceDetector(Node):
 		self.get_logger().info('FaceDetector node initialized')
 
 		cv2.namedWindow("Depth Image", cv2.WINDOW_NORMAL)
-		cv2.namedWindow("Color Image", cv2.WINDOW_NORMAL)
+		cv2.moveWindow("Depth Image", 1, 1)
+		cv2.namedWindow("Face Detection", cv2.WINDOW_NORMAL)
+		cv2.moveWindow("Face Detection", 1, 351)
 
 	def camera_info_callback(self, msg: CameraInfo):
 		if self.camera_info is None:
@@ -99,9 +101,6 @@ class FaceDetector(Node):
 		except CvBridgeError as e:
 			self.get_logger().error(f'RGB conversion failed: {e}')
 			return
-		
-		cv2.imshow("Color Image", color_img)
-		cv2.waitKey(1)
 		
 		# Run face detection (class 0)
 		results = self.model.predict(
@@ -157,16 +156,15 @@ class FaceDetector(Node):
 			cam_pose.pose.orientation.z = float(np.sin(yaw/2.0))
 			cam_pose.pose.orientation.w = float(np.cos(yaw/2.0))
 
-			# Transform into base_link
-			try:
-				t = self.tf_buffer.lookup_transform('base_link', cam_frame, msg.header.stamp, rclpy.duration.Duration(seconds=1.0))
-				base_pose = tf2_geometry_msgs.do_transform_pose(cam_pose, t)
-			except (tf2_ros.LookupException,
-					tf2_ros.ExtrapolationException,
-					tf2_ros.TransformException) as e:
-				self.get_logger().warn(f'TF transform failed: {e}')
-				continue
 
+			# Transform into base_link
+
+			t = self.tf_buffer.lookup_transform('base_link', cam_frame, msg.header.stamp, rclpy.duration.Duration(seconds=1.0))
+			base_pose = tf2_geometry_msgs.do_transform_pose(cam_pose, t)
+
+
+
+			self.get_logger().info("AAAAA")
 			# Create and publish marker in base_link
 			marker = Marker()
 
@@ -177,7 +175,7 @@ class FaceDetector(Node):
 			marker.id = 0
 
 			# Set the scale of the marker
-			scale = 0.5
+			scale = 3.
 			marker.scale.x = scale
 			marker.scale.y = scale
 			marker.scale.z = scale
