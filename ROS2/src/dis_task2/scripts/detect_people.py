@@ -21,7 +21,11 @@ class FaceDetector(Node):
 	def __init__(self):
 		super().__init__('detect_faces')
 
-		self.declare_parameter('device', '')
+		self.declare_parameters(
+			namespace='',
+			parameters=[
+				('device', ''),
+		])
 		self.device = self.get_parameter('device').get_parameter_value().string_value
 
 		self.bridge = CvBridge()
@@ -61,24 +65,30 @@ class FaceDetector(Node):
 		self.get_logger().info('FaceDetector node initialized')
 
 		cv2.namedWindow("Depth Image", cv2.WINDOW_NORMAL)
+		cv2.namedWindow("Color Image", cv2.WINDOW_NORMAL)
 
 	def camera_info_callback(self, msg: CameraInfo):
 		if self.camera_info is None:
 			self.camera_info = msg
-			self.get_logger.info("ℹ️ Received camera intrinsics, unsubscribing from topic!")
+			self.get_logger().info("ℹ️ Received camera intrinsics, unsubscribing from topic!")
 			self.destroy_subscription(self.camera_info_subscriber)
 
 	def depth_callback(self, msg: Image):
 		try:
 			if msg.encoding == '16UC1':
-				depth_raw = self.bridge.imgmsg_to_cv2(msg, desired_encoding='passthrough')
+				depth_raw = self.bridge.imgmsg_to_cv2(msg, desired_encoding='16UC1')
 				self.depth_image = depth_raw.astype(np.float32) / 1000.0
+				disp_image = np.nan_to_num(self.depth_image)
+				disp_image = np.clip(disp_image, 0, 5)
+				disp_image = (disp_image / 5.0 * 255).astype(np.uint8)
+
+				cv2.imshow("Depth Image", disp_image)
+				cv2.waitKey(1)
 			else:
 				self.depth_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='32FC1')
 		except CvBridgeError as e:
 			self.get_logger().error(f'Depth convert error: {e}')
-		cv2.imshow("Depth Image", cv2.cvtColor(depth_raw, cv2.COLOR_GRAY2BGR))
-		self.get_logger().info(self.depth_image)
+		
 
 	def rgb_callback(self, msg: Image):
 		if self.depth_image is None or self.camera_info is None:
@@ -89,7 +99,10 @@ class FaceDetector(Node):
 		except CvBridgeError as e:
 			self.get_logger().error(f'RGB conversion failed: {e}')
 			return
-
+		
+		cv2.imshow("Color Image", color_img)
+		cv2.waitKey(1)
+		
 		# Run face detection (class 0)
 		results = self.model.predict(
 			color_img,
