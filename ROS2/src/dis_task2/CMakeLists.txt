@@ -41,7 +41,6 @@ install(PROGRAMS
   scripts/detect_rings.py
   scripts/ring_locator.py
   scripts/mover.py
-  scripts/StereoDepthNode.py
   DESTINATION lib/${PROJECT_NAME})
 
 ament_export_dependencies(${dependencies} rosidl_default_runtime)
